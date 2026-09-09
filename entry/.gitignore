@@ -1,0 +1,11 @@
+/node_modules
+/oh_modules
+/.preview
+/build
+/.cxx
+/.test
+/.appanalyzer
+/local.properties
+*.log
+.DS_Store
+Thumbs.db
