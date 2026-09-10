@@ -1,3 +1,6 @@
+import { AppCard } from '../common/AppCard'
+import { AppColors } from '../../theme/AppTheme'
+
 @Component
 export struct ProfileContent {
   @State notice: string = ''
@@ -42,10 +45,17 @@ export struct ProfileContent {
             this.actionItem('⚙', '设置', '隐私、账号与帮助', '设置界面待接入')
           }.width('100%').padding({ left: 17, right: 17, top: 4, bottom: 4 }).backgroundColor('#FFFFFF').borderRadius(24)
 
-          Column({ space: 6 }) { Text('拾光集 · 消费者商城').fontSize(13).fontWeight(FontWeight.Medium).fontColor('#547064'); Text('让每一次选择，都更接近喜欢。').fontSize(11).fontColor('#94A099') }.width('100%').padding(18).backgroundColor('#E7EFE9').borderRadius(20)
+          AppCard({
+            eyebrow: '拾光集 · 消费者商城',
+            title: '让每一次选择，都更接近喜欢',
+            description: '关于应用、帮助与服务说明',
+            icon: '✦',
+            cardBackground: AppColors.BRAND_SOFT,
+            onCardClick: () => this.notice = '关于与帮助页面将在后续完善'
+          })
           if (this.notice.length > 0) { Text(this.notice).width('100%').fontSize(12).fontColor('#704932').padding(13).backgroundColor('#FFF0DF').borderRadius(15) }
         }.width('100%').padding({ left: 2, right: 2, bottom: 28 })
       }.layoutWeight(1).scrollBar(BarState.Off)
-    }.width('100%').height('100%').backgroundColor('#F7F5EF')
+    }.width('100%').height('100%').backgroundColor(AppColors.BACKGROUND)
   }
 }

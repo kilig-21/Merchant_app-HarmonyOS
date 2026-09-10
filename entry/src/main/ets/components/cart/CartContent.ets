@@ -66,7 +66,12 @@ export struct CartContent {
           Text('¥ 134').fontSize(22).fontWeight(FontWeight.Bold).fontColor('#C45F3B')
         }.alignItems(HorizontalAlign.Start).layoutWeight(1)
         Text('去结算  →').fontSize(16).fontWeight(FontWeight.Medium).fontColor('#FFFFFF').padding({ left: 27, right: 27, top: 14, bottom: 14 }).backgroundColor('#215C49').borderRadius(22).onClick(this.onCheckout)
-      }.width('100%').padding(14).backgroundColor('#FFFFFF').borderRadius(23)
+      }
+      .width('100%')
+      .padding(14)
+      .margin({ bottom: 72 })
+      .backgroundColor('#FFFFFF')
+      .borderRadius(23)
     }.width('100%').height('100%').backgroundColor('#F7F5EF')
   }
 }

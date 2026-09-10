@@ -4,6 +4,7 @@ import { CartContent } from '../components/cart/CartContent'
 import { ProfileContent } from '../components/profile/ProfileContent'
 import { FloatingTabBar } from '../components/navigation/FloatingTabBar'
 import { PrototypeFlow } from '../components/flow/PrototypeFlow'
+import { AppColors, AppSpacing } from '../theme/AppTheme'
 
 @Entry
 @Component
@@ -21,6 +22,7 @@ struct Index {
           onNavigate: (page: string) => this.flowPage = page
         })
       } else {
+      Stack({ alignContent: Alignment.Bottom }) {
       Column() {
         if (this.selectedTabIndex === 0) {
           HomeContent({ onNavigate: (index: number) => this.selectedTabIndex = index })
@@ -32,20 +34,27 @@ struct Index {
           ProfileContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onOpenOrders: () => this.flowPage = 'orders' })
         }
 
+      }
+      .width('100%')
+      .height('100%')
+      .padding({ left: 16, right: 16, top: 8 })
+
+      Column() {
         FloatingTabBar({
           selectedIndex: this.selectedTabIndex,
           onSelect: (index: number) => this.selectedTabIndex = index
         })
       }
       .width('100%')
-      .height('100%')
-      .padding({ left: 16, right: 16, top: 8, bottom: 14 })
+      .alignItems(HorizontalAlign.Center)
+      .padding({ left: 20, right: 20, bottom: AppSpacing.FLOATING_BAR_BOTTOM })
+      }
       }
     }
     .mode(NavigationMode.Stack)
     .hideTitleBar(true)
     .width('100%')
     .height('100%')
-    .backgroundColor('#F7F5EF')
+    .backgroundColor(AppColors.BACKGROUND)
   }
 }

@@ -1,3 +1,6 @@
+import { PageStateType, PageStateView } from '../common/PageStateView'
+import { AppColors } from '../../theme/AppTheme'
+
 @Component
 export struct HomeContent {
   @State keyword: string = ''
@@ -290,20 +293,11 @@ export struct HomeContent {
           }
           .width('100%')
 
-          Column({ space: 8 }) {
-            Text('真实商品正在路上')
-              .fontSize(16)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#284238')
-            Text('接入店铺和商品搜索接口后，这里将展示真实商品，不使用虚构图片。')
-              .fontSize(12)
-              .fontColor('#78827D')
-              .lineHeight(19)
-          }
-          .width('100%')
-          .padding(18)
-          .backgroundColor('#EDF2EC')
-          .borderRadius(20)
+          PageStateView({
+            type: PageStateType.Empty,
+            title: '真实商品正在路上',
+            description: '接入店铺和商品搜索接口后，这里将展示真实商品，不使用虚构图片。'
+          })
 
           if (this.notice.length > 0) {
             Text(this.notice)
@@ -324,6 +318,6 @@ export struct HomeContent {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F7F5EF')
+    .backgroundColor(AppColors.BACKGROUND)
   }
 }
