@@ -1,10 +1,8 @@
-import { FloatingTabBar } from '../navigation/FloatingTabBar'
-
 @Component
 export struct HomeContent {
   @State keyword: string = ''
   @State notice: string = ''
-  @State selectedTabIndex: number = 0
+  onNavigate: (index: number) => void = () => {}
 
   @Builder
   serviceLink(icon: string, title: string, color: string, message: string) {
@@ -168,7 +166,7 @@ export struct HomeContent {
               .backgroundColor('#E5F0EA')
               .borderRadius(20)
               .onClick(() => {
-                this.notice = '购物车将在登录与购物车功能完成后开放'
+                this.onNavigate(2)
               })
 
               Column() {
@@ -195,7 +193,7 @@ export struct HomeContent {
               .backgroundColor('#F6ECD2')
               .borderRadius(20)
               .onClick(() => {
-                this.notice = '我的订单将在订单功能完成后开放'
+                this.onNavigate(3)
               })
             }
             .width('100%')
@@ -318,23 +316,11 @@ export struct HomeContent {
           }
         }
         .width('100%')
-        .padding({ left: 18, right: 18, top: 20, bottom: 28 })
+        .padding({ left: 2, right: 2, top: 20, bottom: 28 })
       }
       .layoutWeight(1)
       .scrollBar(BarState.Off)
 
-      Column() {
-        FloatingTabBar({
-          selectedIndex: this.selectedTabIndex,
-          onSelect: (index: number) => {
-            this.selectedTabIndex = index
-            const titles: string[] = ['首页', '逛店', '购物车', '我的']
-            this.notice = index === 0 ? '' : `${titles[index]}页面将在主框架步骤接入`
-          }
-        })
-      }
-      .width('100%')
-      .padding({ left: 16, right: 16, top: 8, bottom: 14 })
     }
     .width('100%')
     .height('100%')
