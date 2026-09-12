@@ -17,6 +17,46 @@ export class CartRepository {
 
   async list(): Promise<CartItem[]> {
     await this.wait()
+    this.items = this.items.map((item: CartItem) => this.refreshed(item))
+    return this.items.slice()
+  }
+
+  private refreshed(item: CartItem): CartItem {
+    const catalog = MOCK_CATALOGS.find((entry: MockStoreCatalog) => entry.store.id === item.storeId)
+    const product = catalog?.products.find((entry: ProductSummary) => entry.id === item.productId)
+    const variants = MOCK_PRODUCT_SKUS.find((entry: MockProductSkus) => entry.productId === item.productId)
+    const sku = variants?.skus.find((entry: ProductSku) => entry.id === item.skuId)
+    const availableStock = sku === undefined || product === undefined ? 0 : sku.availableStock
+    const purchasable = availableStock > 0 && item.quantity <= availableStock
+    return { id: item.id, skuId: item.skuId, productId: item.productId, productName: item.productName,
+      skuName: sku === undefined ? item.skuName : sku.skuName,
+      storeId: item.storeId, storeName: item.storeName,
+      salePrice: sku === undefined ? item.salePrice : sku.salePrice,
+      availableStock: availableStock, quantity: item.quantity, purchasable: purchasable,
+      unavailableReason: purchasable ? null : availableStock > 0 ? '库存不足，请减少数量' : '商品暂时不可购买' }
+  }
+
+  async update(itemId: number, quantity: number): Promise<CartItem[]> {
+    await this.wait()
+    const item = this.items.find((entry: CartItem) => entry.id === itemId)
+    if (item === undefined) { throw new Error('购物车商品已不存在，请刷新') }
+    const current = this.refreshed(item)
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > current.availableStock) {
+      throw new Error('购买数量需在 1 件与当前库存之间')
+    }
+    current.quantity = quantity
+    current.purchasable = true
+    current.unavailableReason = null
+    this.items = this.items.map((entry: CartItem) => entry.id === itemId ? current : entry)
+    return this.items.slice()
+  }
+
+  async remove(itemIds: number[]): Promise<CartItem[]> {
+    await this.wait()
+    if (itemIds.length === 0 || !itemIds.every((id: number) => this.items.some((item: CartItem) => item.id === id))) {
+      throw new Error('请重新选择要移除的商品')
+    }
+    this.items = this.items.filter((item: CartItem) => !itemIds.includes(item.id))
     return this.items.slice()
   }
 

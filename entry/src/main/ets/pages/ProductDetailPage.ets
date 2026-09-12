@@ -10,6 +10,7 @@ import { PageStateType, PageStateView } from '../components/common/PageStateView
 export struct ProductDetailPage {
   @Prop storeId: number = 0
   @Prop productId: number = 0
+  @Prop initialSkuId: number = 0
   @ObjectLink cart: CartViewModel
   onBack: () => void = () => {}
   onOpenStore: (storeId: number) => void = () => {}
@@ -38,7 +39,8 @@ export struct ProductDetailPage {
       if (!this.alive) { return }
       this.detail = detail
       this.storeName = store.name
-      const available = detail.skus.find((sku: ProductSku) => sku.availableStock > 0)
+      const requested = detail.skus.find((sku: ProductSku) => sku.id === this.initialSkuId && sku.availableStock > 0)
+      const available = requested === undefined ? detail.skus.find((sku: ProductSku) => sku.availableStock > 0) : requested
       this.selectedSkuId = available === undefined ? 0 : available.id
       this.quantity = 1
     } catch (error) {
@@ -108,7 +110,11 @@ export struct ProductDetailPage {
               onChange: (value: number) => { this.quantity = value; this.feedback = '' } })
           }.width('100%')
         }.width('100%')
-      }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
+      }
+      .layoutWeight(1)
+      .width('100%')
+      .align(Alignment.TopStart)
+      .scrollBar(BarState.Off)
       Button('确认规格', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(8)
         .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER)
         .enabled(this.stock() > 0).onClick(() => this.showSku = false)

@@ -17,9 +17,11 @@ struct Index {
   @State flowPage: string = ''
   @State browseStoreId: number = 1001
   @State cart: CartViewModel = new CartViewModel()
+  @State homeQuery: string = ''
 
-  private openProduct(storeId: number, productId: number): void {
-    const route: ProductRoute = { storeId: storeId, productId: productId }
+  private openProduct(storeId: number, productId: number, skuId: number = 0): void {
+    if (this.pageStack.size() > 0) { return }
+    const route: ProductRoute = { storeId: storeId, productId: productId, skuId: skuId }
     this.pageStack.pushPath({ name: 'product', param: route })
   }
 
@@ -36,6 +38,7 @@ struct Index {
         ProductDetailPage({
           storeId: (param as ProductRoute).storeId,
           productId: (param as ProductRoute).productId,
+          initialSkuId: (param as ProductRoute).skuId ?? 0,
           cart: this.cart,
           onBack: () => this.pageStack.pop(),
           onOpenStore: (storeId: number) => this.openStore(storeId),
@@ -53,7 +56,10 @@ struct Index {
         Stack({ alignContent: Alignment.Bottom }) {
           Column() {
             if (this.selectedTabIndex === 0) {
-              HomeContent({ onNavigate: (index: number) => this.selectedTabIndex = index })
+              HomeContent({ initialQuery: this.homeQuery, cartCount: this.cart.count(),
+                onQueryChange: (query: string) => this.homeQuery = query,
+                onNavigate: (index: number) => this.selectedTabIndex = index,
+                onOpenProduct: (storeId: number, productId: number) => this.openProduct(storeId, productId) })
             } else if (this.selectedTabIndex === 1) {
               StoreContent({
                 selectedStoreId: this.browseStoreId,
@@ -62,13 +68,14 @@ struct Index {
               })
             } else if (this.selectedTabIndex === 2) {
               CartContent({ cart: this.cart, onNavigate: (index: number) => this.selectedTabIndex = index,
-                onOpenProduct: (storeId: number, productId: number) => this.openProduct(storeId, productId) })
+                onOpenStore: (storeId: number) => this.openStore(storeId),
+                onOpenProduct: (storeId: number, productId: number, skuId: number) => this.openProduct(storeId, productId, skuId) })
             } else {
               ProfileContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onOpenOrders: () => this.flowPage = 'orders' })
             }
           }.width('100%').height('100%').padding({ left: 16, right: 16, top: 8 })
           Column() {
-            FloatingTabBar({ selectedIndex: this.selectedTabIndex, onSelect: (index: number) => this.selectedTabIndex = index })
+            FloatingTabBar({ selectedIndex: this.selectedTabIndex, cartCount: this.cart.count(), onSelect: (index: number) => this.selectedTabIndex = index })
           }.width('100%').alignItems(HorizontalAlign.Center)
             .padding({ left: 20, right: 20, bottom: AppSpacing.FLOATING_BAR_BOTTOM })
         }

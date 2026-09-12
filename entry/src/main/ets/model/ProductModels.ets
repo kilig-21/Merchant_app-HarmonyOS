@@ -16,6 +16,7 @@ export interface ProductDetail {
 export interface ProductRoute {
   storeId: number
   productId: number
+  skuId?: number
 }
 export interface DiscoveryProduct extends ProductSummary {
   storeId: number

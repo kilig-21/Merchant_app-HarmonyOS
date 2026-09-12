@@ -1,323 +1,140 @@
+import { DiscoveryProduct } from '../../model/ProductModels'
+import { BrowseRepository } from '../../repository/BrowseRepository'
+import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
-import { AppColors } from '../../theme/AppTheme'
+import { BrowseTheme } from '../../theme/BrowseTheme'
+import { ProductArtwork } from '../../theme/ProductArtwork'
 
 @Component
 export struct HomeContent {
-  @State keyword: string = ''
-  @State notice: string = ''
+  @Prop initialQuery: string = ''
+  @Prop cartCount: number = 0
   onNavigate: (index: number) => void = () => {}
+  onOpenProduct: (storeId: number, productId: number) => void = () => {}
+  onQueryChange: (keyword: string) => void = () => {}
+  @State keyword: string = ''
+  @State products: DiscoveryProduct[] = []
+  @State loading: boolean = true
+  @State failed: boolean = false
+  private repository: BrowseRepository = new BrowseRepository()
+  private requestSerial: number = 0
+  private timer: number = -1
+  private alive: boolean = false
+
+  aboutToAppear(): void {
+    this.alive = true
+    this.keyword = this.initialQuery
+    this.search()
+  }
+  aboutToDisappear(): void {
+    this.alive = false
+    this.requestSerial++
+    clearTimeout(this.timer)
+  }
+  private onKeyword(value: string): void {
+    this.keyword = value
+    this.onQueryChange(value)
+    this.requestSerial++
+    this.loading = true
+    clearTimeout(this.timer)
+    this.timer = setTimeout(() => this.search(), 250)
+  }
+  private async search(): Promise<void> {
+    clearTimeout(this.timer)
+    const serial = ++this.requestSerial
+    this.loading = true
+    this.failed = false
+    try {
+      const products = await this.repository.searchProducts(this.keyword)
+      if (this.alive && serial === this.requestSerial) { this.products = products }
+    } catch (_) {
+      if (this.alive && serial === this.requestSerial) { this.failed = true }
+    } finally {
+      if (this.alive && serial === this.requestSerial) { this.loading = false }
+    }
+  }
 
   @Builder
-  serviceLink(icon: string, title: string, color: string, message: string) {
-    Column({ space: 6 }) {
-      Text(icon)
-        .width(38)
-        .height(38)
-        .fontSize(19)
-        .textAlign(TextAlign.Center)
-        .padding({ top: 8 })
-        .backgroundColor(color)
-        .borderRadius(14)
-      Text(title)
-        .fontSize(11)
-        .fontColor('#35423C')
-    }
-    .layoutWeight(1)
-    .onClick(() => {
-      this.notice = message
-    })
+  productCell(product: DiscoveryProduct, index: number) {
+    Column({ space: 7 }) {
+      BrowseProductCard({ product: product, artwork: ProductArtwork.resolve(product.id),
+        sequence: `${index + 1}`.padStart(2, '0'),
+        onOpen: (productId: number) => this.onOpenProduct(product.storeId, productId) })
+      Text(product.storeName).fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
+    }.layoutWeight(1).alignItems(HorizontalAlign.Start)
   }
 
   build() {
-    Column() {
-      Scroll() {
-        Column({ space: 22 }) {
-          Row() {
-            Column({ space: 3 }) {
-              Text('拾光集')
-                .fontSize(13)
-                .fontWeight(FontWeight.Medium)
-                .fontColor('#C45F3B')
-              Text('让日常，多一点好物')
-                .fontSize(26)
-                .fontWeight(FontWeight.Bold)
-                .fontColor('#18352C')
-            }
-            .alignItems(HorizontalAlign.Start)
-            .layoutWeight(1)
-
-            Text('☀')
-              .width(44)
-              .height(44)
-              .fontSize(22)
-              .textAlign(TextAlign.Center)
-              .padding({ top: 9 })
-              .backgroundColor('#FFF9EE')
-              .borderRadius(22)
-          }
-          .width('100%')
-
-          Search({ value: this.keyword, placeholder: '搜索商品、店铺' })
-            .height(50)
-            .textFont({ size: 15 })
-            .placeholderFont({ size: 15 })
-            .placeholderColor('#909894')
-            .backgroundColor('#FFFFFF')
-            .borderRadius(18)
-            .onChange((value: string) => {
-              this.keyword = value
-            })
-            .onSubmit((value: string) => {
-              this.notice = value.length > 0 ? `“${value}”将在搜索接口接入后查询` : '请输入要搜索的内容'
-            })
-
-          Stack({ alignContent: Alignment.TopEnd }) {
-            Circle({ width: 148, height: 148 })
-              .fill('#F2C66D')
-              .opacity(0.16)
-              .translate({ x: 42, y: -32 })
-
-            Column() {
+    Scroll() {
+      Column({ space: 24 }) {
+        Row() {
+          Text('拾光集 / 消费者商城').fontSize(12).fontColor(BrowseTheme.OLIVE)
+          Blank()
+          Text('本地演示').fontSize(10).fontColor(BrowseTheme.MUTED)
+        }.width('100%')
+        Text('发现好物，\n从这里开始。').fontSize(31).lineHeight(43).fontWeight(FontWeight.Medium)
+          .fontColor(BrowseTheme.INK).width('100%')
+        Search({ value: this.keyword, placeholder: '搜索商品或店铺' }).height(48)
+          .textFont({ size: 14 }).placeholderFont({ size: 14 }).placeholderColor(BrowseTheme.MUTED)
+          .backgroundColor(BrowseTheme.WASH).borderRadius(8)
+          .onChange((value: string) => this.onKeyword(value)).onSubmit(() => this.search())
+        if (this.keyword.trim().length === 0) {
+          Button({ type: ButtonType.Normal }) {
+            Row({ space: 18 }) {
+              Column({ space: 12 }) {
+                Text('从一家好店开始').fontSize(23).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.PAPER)
+                Text('看见商品，也发现值得常来的店铺。').fontSize(12).lineHeight(20).fontColor('#D2D5C9')
+                Text('打开店铺目录  ↗').fontSize(13).fontColor(BrowseTheme.PAPER).margin({ top: 6 })
+              }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+              Text('逛\n店').fontSize(22).lineHeight(32).fontColor('#D2D5C9')
+            }.width('100%').padding(22)
+          }.width('100%').padding(0).backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onNavigate(1))
+          Row({ space: 12 }) {
+            Button({ type: ButtonType.Normal }) {
               Row() {
-                Text('本周新发现')
-                  .fontSize(12)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor('#1C4A3B')
-                  .padding({ left: 11, right: 11, top: 6, bottom: 6 })
-                  .backgroundColor('#F4D88D')
-                  .borderRadius(14)
-                Blank()
-              }
-
-              Blank()
-
-              Text('好生活，不必千篇一律')
-                .fontSize(24)
-                .fontWeight(FontWeight.Bold)
-                .fontColor('#FFFFFF')
-              Text('从精选店铺里，遇见值得留下的日常。')
-                .fontSize(13)
-                .fontColor('#D9EBE4')
-                .margin({ top: 7 })
-
-              Row() {
-                Text('去逛一逛  →')
-                  .fontSize(13)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor('#1D5141')
-                  .padding({ left: 14, right: 14, top: 9, bottom: 9 })
-                  .backgroundColor('#FFFFFF')
-                  .borderRadius(17)
-                Blank()
-                Text('✦')
-                  .fontSize(32)
-                  .fontColor('#F2C66D')
-              }
-              .width('100%')
-              .margin({ top: 15 })
-            }
-            .width('100%')
-            .height(206)
-            .padding(20)
-          }
-          .width('100%')
-          .height(206)
-          .backgroundColor('#215C49')
-          .borderRadius(28)
-          .clip(true)
-          .onClick(() => {
-            this.notice = '精选店铺将在店铺列表接入后开放'
-          })
-
-          Column({ space: 17 }) {
-            Row() {
-              Text('为你服务')
-                .fontSize(18)
-                .fontWeight(FontWeight.Bold)
-                .fontColor('#1F342D')
-              Blank()
-              Text('买东西需要的，都放在手边')
-                .fontSize(12)
-                .fontColor('#8A938E')
-                .maxLines(1)
-            }
-            .width('100%')
-            .alignItems(VerticalAlign.Center)
-
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('🛒').fontSize(22)
-                  Blank()
-                  Text('→').fontSize(16).fontColor('#477161')
-                }
-                .width('100%')
-                Text('购物车')
-                  .fontSize(16)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor('#244538')
-                  .margin({ top: 10 })
-                Text('继续挑选与结算')
-                  .fontSize(11)
-                  .fontColor('#668075')
-                  .margin({ top: 4 })
-              }
-              .alignItems(HorizontalAlign.Start)
-              .layoutWeight(1)
-              .height(112)
-              .padding(15)
-              .backgroundColor('#E5F0EA')
-              .borderRadius(20)
-              .onClick(() => {
-                this.onNavigate(2)
-              })
-
-              Column() {
-                Row() {
-                  Text('📦').fontSize(22)
-                  Blank()
-                  Text('→').fontSize(16).fontColor('#8A6E35')
-                }
-                .width('100%')
-                Text('我的订单')
-                  .fontSize(16)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor('#574727')
-                  .margin({ top: 10 })
-                Text('查看订单状态')
-                  .fontSize(11)
-                  .fontColor('#89764E')
-                  .margin({ top: 4 })
-              }
-              .alignItems(HorizontalAlign.Start)
-              .layoutWeight(1)
-              .height(112)
-              .padding(15)
-              .backgroundColor('#F6ECD2')
-              .borderRadius(20)
-              .onClick(() => {
-                this.onNavigate(3)
-              })
-            }
-            .width('100%')
-
-            Row() {
-              this.serviceLink('🛍', '热门商品', '#FFF0E9', '热门商品将在搜索接口接入后开放')
-              this.serviceLink('📍', '收货地址', '#FCE8E4', '收货地址将在地址管理完成后开放')
-              this.serviceLink('♻', '售后服务', '#E7F1F3', '售后服务将在订单功能完成后开放')
-              this.serviceLink('⋯', '全部服务', '#EEECE7', '更多服务正在规划中')
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding(18)
-          .backgroundColor('#FFFFFF')
-          .borderRadius(24)
-
-          Column({ space: 13 }) {
-            Row() {
-              Column({ space: 3 }) {
-                Text('正在发生')
-                  .fontSize(12)
-                  .fontColor('#C45F3B')
-                Text('今天，逛点不一样的')
-                  .fontSize(20)
-                  .fontWeight(FontWeight.Bold)
-                  .fontColor('#1F342D')
-              }
-              .alignItems(HorizontalAlign.Start)
-              .layoutWeight(1)
-              Text('全部  →')
-                .fontSize(12)
-                .fontColor('#6E7B75')
-            }
-            .width('100%')
-
-            Row({ space: 10 }) {
-              Column() {
-                Text('限时抢购')
-                  .fontSize(18)
-                  .fontWeight(FontWeight.Bold)
-                  .fontColor('#FFFFFF')
-                Text('好价准时见')
-                  .fontSize(12)
-                  .fontColor('#FFE6DC')
-                  .margin({ top: 5 })
-                Blank()
-                Text('即将开放')
-                  .fontSize(11)
-                  .fontColor('#A84728')
-                  .padding({ left: 10, right: 10, top: 6, bottom: 6 })
-                  .backgroundColor('#FFFFFF')
-                  .borderRadius(13)
-              }
-              .alignItems(HorizontalAlign.Start)
-              .layoutWeight(3)
-              .height(150)
-              .padding(17)
-              .backgroundColor('#ED6A43')
-              .borderRadius(24)
-              .onClick(() => {
-                this.notice = '限时抢购将在促销接口接入后开放'
-              })
-
-              Column({ space: 10 }) {
-                Column({ space: 4 }) {
-                  Text('精选店铺').fontSize(14).fontWeight(FontWeight.Medium).fontColor('#284238')
-                  Text('发现小店').fontSize(11).fontColor('#7A827D')
-                }
-                .alignItems(HorizontalAlign.Start)
-                .justifyContent(FlexAlign.Center)
-                .layoutWeight(1)
-                .width('100%')
-                .padding({ left: 13 })
-                .backgroundColor('#E4EFE8')
-                .borderRadius(18)
-
-                Column({ space: 4 }) {
-                  Text('新品上架').fontSize(14).fontWeight(FontWeight.Medium).fontColor('#51462E')
-                  Text('等待接入').fontSize(11).fontColor('#8B8068')
-                }
-                .alignItems(HorizontalAlign.Start)
-                .justifyContent(FlexAlign.Center)
-                .layoutWeight(1)
-                .width('100%')
-                .padding({ left: 13 })
-                .backgroundColor('#F3E8CA')
-                .borderRadius(18)
-              }
-              .layoutWeight(2)
-              .height(150)
-            }
-            .width('100%')
-          }
-          .width('100%')
-
-          PageStateView({
-            type: PageStateType.Empty,
-            title: '真实商品正在路上',
-            description: '接入店铺和商品搜索接口后，这里将展示真实商品，不使用虚构图片。'
-          })
-
-          if (this.notice.length > 0) {
-            Text(this.notice)
-              .width('100%')
-              .fontSize(12)
-              .fontColor('#704932')
-              .padding(13)
-              .backgroundColor('#FFF0DF')
-              .borderRadius(15)
-          }
+                Column({ space: 5 }) {
+                  Text('购物车').fontSize(16).fontColor(BrowseTheme.INK)
+                  Text(this.cartCount > 0 ? `${this.cartCount} 件好物待整理` : '把喜欢的，留在这里').fontSize(11).fontColor(BrowseTheme.MUTED)
+                }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+                Text('↗').fontSize(20).fontColor(BrowseTheme.OLIVE)
+              }.padding(16).width('100%')
+            }.layoutWeight(1).padding(0).backgroundColor(BrowseTheme.WASH).borderRadius(8).onClick(() => this.onNavigate(2))
+            Button('我的 ›', { type: ButtonType.Normal }).width(88).height(72).padding(8).fontSize(14)
+              .fontColor(BrowseTheme.INK).backgroundColor('#EFEBDF').borderRadius(8).onClick(() => this.onNavigate(3))
+          }.width('100%')
         }
-        .width('100%')
-        .padding({ left: 2, right: 2, top: 20, bottom: 28 })
-      }
-      .layoutWeight(1)
-      .scrollBar(BarState.Off)
-
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(AppColors.BACKGROUND)
+        Row() {
+          Text(this.keyword.trim().length > 0 ? '搜索结果' : '慢慢挑选').fontSize(22).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+          Blank()
+          if (!this.loading && !this.failed) {
+            Text(`${this.products.length} 件商品`).fontSize(12).fontColor(BrowseTheme.MUTED)
+          }
+        }.width('100%')
+        if (this.loading) {
+          PageStateView({ type: PageStateType.Loading, title: '正在寻找好物', description: '' })
+        } else if (this.failed) {
+          PageStateView({ type: PageStateType.Error, title: '商品暂时没有加载出来', description: '再试一次。', onAction: () => this.search() })
+        } else if (this.products.length === 0) {
+          Column({ space: 14 }) {
+            Text('还没有找到合适的商品').fontSize(18).fontColor(BrowseTheme.INK)
+            Text('换个关键词，或去店铺里逛逛。').fontSize(13).fontColor(BrowseTheme.MUTED)
+            Button('查看全部商品', { type: ButtonType.Normal }).height(44).fontColor(BrowseTheme.PAPER)
+              .backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onKeyword(''))
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(22).backgroundColor(BrowseTheme.WASH)
+        } else {
+          ForEach(this.products, (product: DiscoveryProduct, index: number) => {
+            if (index % 2 === 0) {
+              Row({ space: 14 }) {
+                this.productCell(product, index)
+                if (index + 1 < this.products.length) {
+                  this.productCell(this.products[index + 1], index + 1)
+                } else { Column().layoutWeight(1) }
+              }.width('100%').alignItems(VerticalAlign.Top)
+            }
+          }, (product: DiscoveryProduct) => `${product.storeId}-${product.id}`)
+          Text('商品图片为示意图 · 当前为演示商品').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
+        }
+      }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 4, right: 4, top: 22, bottom: 108 })
+    }.width('100%').height('100%').scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
   }
 }

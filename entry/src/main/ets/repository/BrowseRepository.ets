@@ -7,6 +7,23 @@ import { MOCK_PRODUCT_SKUS, MockProductSkus } from '../mock/ProductMockData'
 export class BrowseRepository {
   private hasFailed: boolean = false
 
+  async searchProducts(keyword: string): Promise<DiscoveryProduct[]> {
+    await this.waitForMock()
+    if (BrowseConfig.scenario === BrowseScenario.EmptyStores) { return [] }
+    const query = keyword.trim().toLowerCase()
+    const result: DiscoveryProduct[] = []
+    MOCK_CATALOGS.forEach((catalog: MockStoreCatalog) => {
+      catalog.products.forEach((product: ProductSummary) => {
+        if (query.length === 0 || (product.name + ' ' + product.description + ' ' + catalog.store.name).toLowerCase().includes(query)) {
+          result.push({ storeId: catalog.store.id, storeName: catalog.store.name,
+            id: product.id, name: product.name, description: product.description,
+            minSalePrice: product.minSalePrice, totalAvailableStock: product.totalAvailableStock, updatedAt: product.updatedAt })
+        }
+      })
+    })
+    return result
+  }
+
   async getStore(storeId: number): Promise<StoreSummary> {
     await this.waitForMock()
     const catalog = MOCK_CATALOGS.find((item: MockStoreCatalog) => item.store.id === storeId)
