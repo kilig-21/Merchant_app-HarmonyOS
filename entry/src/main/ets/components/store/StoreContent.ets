@@ -3,6 +3,7 @@ import { BrowseRepository } from '../../repository/BrowseRepository'
 import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 import { BrowseTheme } from '../../theme/BrowseTheme'
+import { ProductArtwork } from '../../theme/ProductArtwork'
 
 @Component
 export struct StoreContent {
@@ -15,8 +16,8 @@ export struct StoreContent {
   @State loadingProducts: boolean = false
   @State storeError: boolean = false
   @State productError: boolean = false
-  @State showOverview: boolean = false
-  @State overview: ProductSummary | undefined = undefined
+  onOpenProduct: (storeId: number, productId: number) => void = () => {}
+
   private repository: BrowseRepository = new BrowseRepository()
   private requestSerial: number = 0
   private alive: boolean = false
@@ -80,43 +81,14 @@ export struct StoreContent {
     return store === undefined ? '' : store.name
   }
 
-  private artwork(productId: number): Resource {
-    if (productId === 2002) { return $r('app.media.browse_glass') }
-    if (productId === 2003) { return $r('app.media.browse_scent') }
-    if (productId >= 2100) { return $r('app.media.browse_coffee') }
-    return $r('app.media.browse_tea')
-  }
-
-  private openOverview(productId: number): void {
-    this.overview = this.products.find((item: ProductSummary) => item.id === productId)
-    this.showOverview = this.overview !== undefined
-  }
-
-  @Builder
-  overviewSheet() {
-    Scroll() {
-    Column({ space: 16 }) {
-      if (this.overview !== undefined) {
-        Image(this.artwork(this.overview.id)).width('100%').height(220).objectFit(ImageFit.Contain)
-        Text(this.overview.name).fontSize(25).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
-        Text(this.overview.description).fontSize(15).lineHeight(24).fontColor(BrowseTheme.MUTED)
-        Text(`¥ ${this.overview.minSalePrice.toFixed(2)} 起`).fontSize(26).fontColor(BrowseTheme.INK)
-        Text(this.overview.totalAvailableStock > 0 ? `可用库存 ${this.overview.totalAvailableStock} 件` : '暂时售罄')
-          .fontSize(14).fontColor(BrowseTheme.OLIVE)
-        Text('演示商品 · 图片为示意图').fontSize(12).fontColor(BrowseTheme.MUTED)
-      }
-    }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 24, right: 24, bottom: 24 })
-    }.width('100%').height('100%').scrollBar(BarState.Off)
-  }
-
   @Builder
   productCell(product: ProductSummary, index: number) {
     Column() {
       BrowseProductCard({
         product: product,
-        artwork: this.artwork(product.id),
+        artwork: ProductArtwork.resolve(product.id),
         sequence: `${index + 1}`.padStart(2, '0'),
-        onOpen: (productId: number) => this.openOverview(productId)
+        onOpen: (productId: number) => this.onOpenProduct(this.activeStoreId, productId)
       })
     }.layoutWeight(1).alignSelf(ItemAlign.Start)
   }
@@ -235,11 +207,6 @@ export struct StoreContent {
       }.width('100%').constraintSize({ maxWidth: 640 })
         .padding({ left: 4, right: 4, top: 20, bottom: BrowseTheme.BOTTOM_CLEARANCE })
     }.width('100%').height('100%').scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
-      .bindSheet($$this.showOverview, this.overviewSheet(), {
-        height: SheetSize.LARGE,
-        showClose: true,
-        title: { title: '商品概览', subtitle: '浏览演示' },
-        backgroundColor: BrowseTheme.PAPER
-      })
+
   }
 }
