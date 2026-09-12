@@ -3,7 +3,7 @@
 > 创建日期：2026-09-09  
 > 适用工程：`C:\Users\Lenovo\Desktop\ALLCODE\Uni-app`  
 > 配套后端：`C:\Users\Lenovo\Desktop\Merchant_AI_Operation\server`  
-> 接口依据：`C:\Users\Lenovo\Desktop\harmony-app-api-integration.md`  
+> 接口依据：`C:\Users\Lenovo\Desktop\ALLCODE\Uni-app\docs\harmony-app-api-integration.md`
 > 目标：逐步完成一个消费者购物 App，页面组件可替换，业务逻辑和接口层可独立维护。
 
 > 跨对话使用：新对话先执行第 11 节的接手流程，依据源码、提交差异和验收记录定位进度，再按第 6 节教学推进。不要默认从步骤 01 重做，也不要一次性实现全部步骤。
@@ -514,7 +514,7 @@ Bar 内部不调用购物车接口，不判断登录，不创建订单。点击�
 
 ## 10. 参考材料与维护
 
-- 本地接口合同：[harmony-app-api-integration.md](C:/Users/Lenovo/Desktop/harmony-app-api-integration.md)。具体路径、字段、状态和缺失能力依据此文档，并结合后端源码核对。
+- 本地接口合同：[harmony-app-api-integration.md](./harmony-app-api-integration.md)。具体路径、字段、状态和缺失能力依据此文档，并结合后端源码核对。
 - 当前页面起点：[Index.ets](../entry/src/main/ets/pages/Index.ets)。
 - 当前权限配置：[module.json5](../entry/src/main/module.json5)。
 - 当前 SDK 配置：[build-profile.json5](../build-profile.json5)。

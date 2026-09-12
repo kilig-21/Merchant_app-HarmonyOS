@@ -12,6 +12,7 @@ struct Index {
   private pageStack: NavPathStack = new NavPathStack()
   @State selectedTabIndex: number = 0
   @State flowPage: string = ''
+  @State browseStoreId: number = 1001
 
   build() {
     Navigation(this.pageStack) {
@@ -27,7 +28,10 @@ struct Index {
         if (this.selectedTabIndex === 0) {
           HomeContent({ onNavigate: (index: number) => this.selectedTabIndex = index })
         } else if (this.selectedTabIndex === 1) {
-          StoreContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onOpenProduct: () => this.flowPage = 'product' })
+          StoreContent({
+            selectedStoreId: this.browseStoreId,
+            onSelectStore: (storeId: number) => this.browseStoreId = storeId
+          })
         } else if (this.selectedTabIndex === 2) {
           CartContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onCheckout: () => this.flowPage = 'checkout' })
         } else {
