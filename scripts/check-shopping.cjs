@@ -34,6 +34,8 @@ async function run() {
   const { CartRepository } = load('repository/CartRepository.ets');
   const { CartViewModel } = load('viewmodel/CartViewModel.ets');
   const { Money } = load('utils/Money.ets');
+  // 此脚本校验仓库内置 Mock 边界，不依赖当前应用的联调数据源配置。
+  BrowseConfig.source = BrowseSource.Mock;
   BrowseConfig.delayMs = 0;
   const browse = new BrowseRepository();
   const stores = await browse.getStores();

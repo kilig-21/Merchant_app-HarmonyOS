@@ -54,8 +54,10 @@ export struct OrdersPage {
     if (this.detail === null || this.actionBusy) { return }
     this.actionBusy = true
     try {
-      this.detail = await OrderApi.cancel(this.detail.id)
+      const orderId = this.detail.id
+      await OrderApi.cancel(orderId)
       await this.load()
+      this.detail = await OrderApi.get(orderId)
     } catch (error) { this.error = error instanceof Error ? error.message : '订单取消失败，请刷新后重试' }
     finally { this.actionBusy = false }
   }

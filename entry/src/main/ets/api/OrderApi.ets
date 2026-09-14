@@ -11,7 +11,7 @@ export class OrderApi {
     return await HttpClient.request<OrderDetail>(`/api/orders/${orderId}`)
   }
 
-  static async cancel(orderId: number): Promise<OrderDetail> {
-    return await HttpClient.request<OrderDetail>(`/api/orders/${orderId}/cancel`, new RequestOptions(http.RequestMethod.POST))
+  static async cancel(orderId: number): Promise<void> {
+    await HttpClient.request<void>(`/api/orders/${orderId}/cancel`, new RequestOptions(http.RequestMethod.POST))
   }
 }

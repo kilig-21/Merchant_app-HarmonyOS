@@ -3,9 +3,8 @@
  * 真机或模拟器不能填写 127.0.0.1，因为它会指向设备自身。
  */
 export class NetworkConfig {
-  // 联调时填入运行 Spring Boot 电脑的局域网 IPv4，例如 http://10.251.73.246:8080。
-  // 不提交个人局域网地址；空值会在请求前明确提示未配置服务地址。
-  static readonly BASE_URL: string = ''
+  // 当前联调后端运行在本机 WLAN 地址；设备和电脑必须处于同一局域网。
+  static readonly BASE_URL: string = 'http://10.251.73.246:8080'
 
   static readonly CONNECT_TIMEOUT_MS: number = 10000
   static readonly READ_TIMEOUT_MS: number = 15000
