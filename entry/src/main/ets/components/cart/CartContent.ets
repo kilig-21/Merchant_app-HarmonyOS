@@ -11,6 +11,7 @@ export struct CartContent {
   onNavigate: (index: number) => void = () => {}
   onOpenProduct: (storeId: number, productId: number, skuId: number) => void = () => {}
   onOpenStore: (storeId: number) => void = () => {}
+  onCheckout: () => void = () => {}
   @State showReview: boolean = false
 
   aboutToAppear(): void { this.cart.load() }
@@ -65,10 +66,11 @@ export struct CartContent {
         Blank()
         Text(`¥ ${this.cart.selectedSubtotal()}`).fontSize(25).fontColor(BrowseTheme.INK)
       }.width('100%')
-      Text('以上为商品预估金额，未含运费。收货地址与下单暂未开放，本次不会创建订单。')
+      Text('以上为商品预估金额，未含运费。提交后以服务端结算金额和状态为准。')
         .fontSize(12).lineHeight(20).fontColor(BrowseTheme.MUTED).width('100%')
-      Button('返回购物车', { type: ButtonType.Normal }).width('100%').height(48)
-        .fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.showReview = false)
+      Button('填写地址并提交订单', { type: ButtonType.Normal }).width('100%').height(48)
+        .fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK).borderRadius(8)
+        .onClick(() => { this.showReview = false; this.onCheckout() })
     }.width('100%').height('100%').padding({ left: 22, right: 22, bottom: 24 })
   }
 

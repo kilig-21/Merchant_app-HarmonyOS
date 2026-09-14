@@ -18,6 +18,7 @@ export struct ProfileContent {
   @State authMessage: string = ''
   onNavigate: (index: number) => void = () => {}
   onOpenOrders: () => void = () => {}
+  onOpenAddresses: () => void = () => {}
 
   aboutToAppear(): void {
     this.restoreSession()
@@ -130,12 +131,12 @@ export struct ProfileContent {
   }
 
   @Builder
-  actionItem(icon: string, title: string, detail: string, message: string) {
+  actionItem(icon: string, title: string, detail: string, message: string, onAction: () => void = () => {}) {
     Row({ space: 13 }) {
       Text(icon).width(38).height(38).fontSize(18).textAlign(TextAlign.Center).padding({ top: 9 }).backgroundColor('#EDF2EC').borderRadius(13)
       Column({ space: 3 }) { Text(title).fontSize(15).fontWeight(FontWeight.Medium).fontColor('#294238'); Text(detail).fontSize(11).fontColor('#839089') }.alignItems(HorizontalAlign.Start).layoutWeight(1)
       Text('›').fontSize(23).fontColor('#A1ABA5')
-    }.width('100%').padding({ top: 12, bottom: 12 }).onClick(() => this.notice = message)
+    }.width('100%').padding({ top: 12, bottom: 12 }).onClick(() => { this.notice = message; onAction() })
   }
 
   build() {
@@ -168,7 +169,7 @@ export struct ProfileContent {
           }.width('100%').padding(18).backgroundColor('#FFFFFF').borderRadius(24)
 
           Column() {
-            this.actionItem('⌂', '收货地址', '管理常用收货信息', '地址管理界面待接入')
+            this.actionItem('⌂', '收货地址', '管理常用收货信息', '', this.onOpenAddresses)
             Divider().color('#EEF0EC').strokeWidth(1)
             this.actionItem('♧', '售后服务', '申请售后与查看进度', '售后服务界面待接入')
             Divider().color('#EEF0EC').strokeWidth(1)

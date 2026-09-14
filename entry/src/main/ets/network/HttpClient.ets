@@ -12,11 +12,13 @@ export class RequestOptions {
   method?: http.RequestMethod
   query?: QueryParam[]
   body?: Object
+  headers?: RequestHeader[]
 
-  constructor(method?: http.RequestMethod, body?: Object, query?: QueryParam[]) {
+  constructor(method?: http.RequestMethod, body?: Object, query?: QueryParam[], headers?: RequestHeader[]) {
     this.method = method
     this.body = body
     this.query = query
+    this.headers = headers
   }
 }
 
@@ -25,6 +27,16 @@ export class QueryParam {
   value: string | number | boolean
 
   constructor(key: string, value: string | number | boolean) {
+    this.key = key
+    this.value = value
+  }
+}
+
+export class RequestHeader {
+  key: string
+  value: string
+
+  constructor(key: string, value: string) {
     this.key = key
     this.value = value
   }
@@ -52,7 +64,7 @@ export class HttpClient {
     try {
       const requestOptions: http.HttpRequestOptions = {
         method: options.method ?? http.RequestMethod.GET,
-        header: HttpClient.buildHeaders(),
+        header: HttpClient.buildHeaders(options.headers),
         connectTimeout: NetworkConfig.CONNECT_TIMEOUT_MS,
         readTimeout: NetworkConfig.READ_TIMEOUT_MS
       }
@@ -98,7 +110,7 @@ export class HttpClient {
     }
   }
 
-  private static buildHeaders(): Record<string, string> {
+  private static buildHeaders(extraHeaders?: RequestHeader[]): Record<string, string> {
     const headers: Record<string, string> = {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
@@ -106,6 +118,9 @@ export class HttpClient {
 
     if (HttpClient.accessToken.length > 0) {
       headers['Authorization'] = `Bearer ${HttpClient.accessToken}`
+    }
+    if (extraHeaders !== undefined) {
+      extraHeaders.forEach((item: RequestHeader) => headers[item.key] = item.value)
     }
 
     return headers
