@@ -8,10 +8,16 @@ export interface ApiResponse<T> {
   data: T | null
 }
 
-export interface RequestOptions {
+export class RequestOptions {
   method?: http.RequestMethod
   query?: Record<string, string | number | boolean | undefined>
   body?: Object
+
+  constructor(method?: http.RequestMethod, body?: Object, query?: Record<string, string | number | boolean | undefined>) {
+    this.method = method
+    this.body = body
+    this.query = query
+  }
 }
 
 export class HttpClient {
@@ -25,7 +31,7 @@ export class HttpClient {
     HttpClient.accessToken = ''
   }
 
-  static async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  static async request<T>(path: string, options: RequestOptions = new RequestOptions()): Promise<T> {
     const baseUrl = NetworkConfig.BASE_URL.trim().replace(/\/+$/, '')
     if (baseUrl.length === 0) {
       throw new ApiError(ApiErrorKind.Configuration, '未配置后端服务地址')
