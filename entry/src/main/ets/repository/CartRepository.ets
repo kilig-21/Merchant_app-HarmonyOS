@@ -4,6 +4,8 @@ import { MOCK_PRODUCT_SKUS, MockProductSkus } from '../mock/ProductMockData'
 import { ProductSku } from '../model/ProductModels'
 import { ProductSummary } from '../model/StoreModels'
 import { BrowseConfig } from '../config/BrowseConfig'
+import { BrowseSource } from '../config/BrowseConfig'
+import { CartApi } from '../api/CartApi'
 
 /** 仅在本次 App 进程中保存的 Mock 购物车，不与账号同步。 */
 export class CartRepository {
@@ -11,11 +13,15 @@ export class CartRepository {
   private nextId: number = 4001
 
   private async wait(): Promise<void> {
-    if (BrowseConfig.source !== 'mock') { throw new Error('购物车接口尚未接入') }
+    if (BrowseConfig.source === BrowseSource.Remote) { return }
     await new Promise<void>((resolve) => { setTimeout(() => resolve(), BrowseConfig.delayMs) })
   }
 
   async list(): Promise<CartItem[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      this.items = await CartApi.list()
+      return this.items.slice()
+    }
     await this.wait()
     this.items = this.items.map((item: CartItem) => this.refreshed(item))
     return this.items.slice()
@@ -37,6 +43,10 @@ export class CartRepository {
   }
 
   async update(itemId: number, quantity: number): Promise<CartItem[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      await CartApi.update(itemId, quantity)
+      return await this.list()
+    }
     await this.wait()
     const item = this.items.find((entry: CartItem) => entry.id === itemId)
     if (item === undefined) { throw new Error('购物车商品已不存在，请刷新') }
@@ -52,6 +62,13 @@ export class CartRepository {
   }
 
   async remove(itemIds: number[]): Promise<CartItem[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      if (itemIds.length === 0) { throw new Error('请重新选择要移除的商品') }
+      for (const itemId of itemIds) {
+        await CartApi.remove(itemId)
+      }
+      return await this.list()
+    }
     await this.wait()
     if (itemIds.length === 0 || !itemIds.every((id: number) => this.items.some((item: CartItem) => item.id === id))) {
       throw new Error('请重新选择要移除的商品')
@@ -61,6 +78,10 @@ export class CartRepository {
   }
 
   async add(skuId: number, quantity: number): Promise<CartItem[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      await CartApi.add(skuId, quantity)
+      return await this.list()
+    }
     await this.wait()
     const variants = MOCK_PRODUCT_SKUS.find((item: MockProductSkus) =>
       item.skus.some((sku: ProductSku) => sku.id === skuId))
