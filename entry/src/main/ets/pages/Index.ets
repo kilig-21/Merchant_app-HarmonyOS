@@ -7,6 +7,7 @@ import { PrototypeFlow } from '../components/flow/PrototypeFlow'
 import { ProductDetailPage } from './ProductDetailPage'
 import { AddressManagerPage } from './AddressManagerPage'
 import { CheckoutPage } from './CheckoutPage'
+import { OrdersPage } from './OrdersPage'
 import { ProductRoute } from '../model/ProductModels'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { AppColors, AppSpacing } from '../theme/AppTheme'
@@ -56,7 +57,9 @@ struct Index {
       if (this.utilityPage === 'addresses') {
         AddressManagerPage({ onBack: () => this.utilityPage = '' })
       } else if (this.utilityPage === 'checkout') {
-        CheckoutPage({ cart: this.cart, onBack: () => this.utilityPage = '', onOpenAddresses: () => this.utilityPage = 'addresses', onOpenOrders: () => { this.utilityPage = ''; this.flowPage = 'orders' } })
+        CheckoutPage({ cart: this.cart, onBack: () => this.utilityPage = '', onOpenAddresses: () => this.utilityPage = 'addresses', onOpenOrders: () => this.utilityPage = 'orders' })
+      } else if (this.utilityPage === 'orders') {
+        OrdersPage({ onBack: () => this.utilityPage = '' })
       } else if (this.flowPage.length > 0) {
         PrototypeFlow({ page: this.flowPage, onBack: () => this.flowPage = '', onNavigate: (page: string) => this.flowPage = page })
       } else {
@@ -79,7 +82,7 @@ struct Index {
                 onOpenProduct: (storeId: number, productId: number, skuId: number) => this.openProduct(storeId, productId, skuId),
                 onCheckout: () => this.utilityPage = 'checkout' })
             } else {
-              ProfileContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onOpenOrders: () => this.flowPage = 'orders', onOpenAddresses: () => this.utilityPage = 'addresses' })
+              ProfileContent({ onNavigate: (index: number) => this.selectedTabIndex = index, onOpenOrders: () => this.utilityPage = 'orders', onOpenAddresses: () => this.utilityPage = 'addresses' })
             }
           }.width('100%').height('100%').padding({ left: 16, right: 16, top: 8 })
           Column() {

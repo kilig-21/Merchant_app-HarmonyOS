@@ -16,7 +16,12 @@ function load(relative) {
   if (cache.has(full)) return cache.get(full).exports;
   const mod = new Module(full);
   cache.set(full, mod);
-  mod.require = id => id.startsWith('.') ? load(path.relative(sourceRoot, path.resolve(path.dirname(full), id + '.ets'))) : require(id);
+  mod.require = id => {
+    if (id === '@kit.NetworkKit') {
+      return { http: { RequestMethod: { GET: 'GET', POST: 'POST', PUT: 'PUT', DELETE: 'DELETE' } } };
+    }
+    return id.startsWith('.') ? load(path.relative(sourceRoot, path.resolve(path.dirname(full), id + '.ets'))) : require(id);
+  };
   const result = ts.transpileModule(fs.readFileSync(full, 'utf8'), {
     compilerOptions: { target: ts.ScriptTarget.ES2021, module: ts.ModuleKind.CommonJS, experimentalDecorators: true }
   });
@@ -24,7 +29,7 @@ function load(relative) {
   return mod.exports;
 }
 async function run() {
-  const { BrowseConfig, BrowseScenario } = load('config/BrowseConfig.ets');
+  const { BrowseConfig, BrowseScenario, BrowseSource } = load('config/BrowseConfig.ets');
   const { BrowseRepository } = load('repository/BrowseRepository.ets');
   const { CartRepository } = load('repository/CartRepository.ets');
   const { CartViewModel } = load('viewmodel/CartViewModel.ets');
@@ -148,9 +153,9 @@ async function run() {
   const onlyId = concurrentVm.items[0].id;
   await Promise.all([concurrentVm.update(onlyId, 2), concurrentVm.remove([onlyId])]);
   assert.equal(concurrentVm.count(), 2, '写操作进行中，不交错处理另一个写操作');
-  BrowseConfig.source = 'real';
+  BrowseConfig.source = BrowseSource.Remote;
   await assert.rejects(new CartRepository().list());
-  BrowseConfig.source = 'mock';
+  BrowseConfig.source = BrowseSource.Mock;
   console.log('PASS: 商品/SKU/加购、跨店单选/店选/全选、独立数量、无效数量回滚、批量删除原子性、失效项/库存恢复、空车/角标计数、写操作互斥、搜索、金额精度、Mock 边界。');
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });
