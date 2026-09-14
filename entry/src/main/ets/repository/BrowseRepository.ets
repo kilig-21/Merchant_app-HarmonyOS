@@ -1,4 +1,6 @@
-import { BrowseConfig, BrowseScenario } from '../config/BrowseConfig'
+import { BrowseConfig, BrowseScenario, BrowseSource } from '../config/BrowseConfig'
+import { ProductApi } from '../api/ProductApi'
+import { StoreApi } from '../api/StoreApi'
 import { MOCK_CATALOGS, MockStoreCatalog } from '../mock/BrowseMockData'
 import { ProductSummary, StoreSummary } from '../model/StoreModels'
 import { ProductDetail, DiscoveryProduct } from '../model/ProductModels'
@@ -8,6 +10,9 @@ export class BrowseRepository {
   private hasFailed: boolean = false
 
   async searchProducts(keyword: string): Promise<DiscoveryProduct[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      return await ProductApi.searchProducts(keyword)
+    }
     await this.waitForMock()
     if (BrowseConfig.scenario === BrowseScenario.EmptyStores) { return [] }
     const query = keyword.trim().toLowerCase()
@@ -25,6 +30,12 @@ export class BrowseRepository {
   }
 
   async getStore(storeId: number): Promise<StoreSummary> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      const stores = await StoreApi.getStores()
+      const store = stores.find((item: StoreSummary) => item.id === storeId)
+      if (store === undefined) { throw new Error('店铺不存在或已下架') }
+      return store
+    }
     await this.waitForMock()
     const catalog = MOCK_CATALOGS.find((item: MockStoreCatalog) => item.store.id === storeId)
     if (catalog === undefined) { throw new Error('店铺不存在') }
@@ -32,6 +43,9 @@ export class BrowseRepository {
   }
 
   async getProduct(storeId: number, productId: number): Promise<ProductDetail> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      return await ProductApi.getProduct(storeId, productId)
+    }
     const products = await this.getProducts(storeId)
     const product = products.find((item: ProductSummary) => item.id === productId)
     const variants = MOCK_PRODUCT_SKUS.find((item: MockProductSkus) => item.productId === productId)
@@ -41,7 +55,7 @@ export class BrowseRepository {
   }
 
   private async waitForMock(): Promise<void> {
-    if (BrowseConfig.source !== 'mock') { throw new Error('真实浏览接口尚未接入') }
+    if (BrowseConfig.source !== BrowseSource.Mock) { return }
     await new Promise<void>((resolve) => { setTimeout(() => resolve(), BrowseConfig.delayMs) })
     if (BrowseConfig.scenario === BrowseScenario.FailOnce && !this.hasFailed) {
       this.hasFailed = true
@@ -50,12 +64,18 @@ export class BrowseRepository {
   }
 
   async getStores(): Promise<StoreSummary[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      return await StoreApi.getStores()
+    }
     await this.waitForMock()
     if (BrowseConfig.scenario === BrowseScenario.EmptyStores) { return [] }
     return MOCK_CATALOGS.map((catalog: MockStoreCatalog) => catalog.store)
   }
 
   async getProducts(storeId: number): Promise<ProductSummary[]> {
+    if (BrowseConfig.source === BrowseSource.Remote) {
+      return await ProductApi.getProducts(storeId)
+    }
     await this.waitForMock()
     if (BrowseConfig.scenario === BrowseScenario.FailProductsOnce && !this.hasFailed) {
       this.hasFailed = true

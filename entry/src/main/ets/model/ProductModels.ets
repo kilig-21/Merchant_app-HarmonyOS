@@ -13,6 +13,12 @@ export interface ProductDetail {
   updatedAt: string
   skus: ProductSku[]
 }
+export interface ProductSkuAvailability {
+  skuId: number
+  purchasable: boolean
+  availableStock: number
+  message: string
+}
 export interface ProductRoute {
   storeId: number
   productId: number

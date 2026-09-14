@@ -5,9 +5,14 @@ export enum BrowseScenario {
   EmptyStores = 'emptyStores'
 }
 
-/** 故障验收切换 scenario，验收结束恢复 Normal。真实模式尚未实现。 */
+export enum BrowseSource {
+  Mock = 'mock',
+  Remote = 'remote'
+}
+
+/** Mock 只供无后端时演示；切换到 Remote 后，接口失败必须直接展示失败状态。 */
 export class BrowseConfig {
-  static readonly source: string = 'mock'
+  static readonly source: BrowseSource = BrowseSource.Mock
   static readonly scenario: BrowseScenario = BrowseScenario.Normal
   static readonly delayMs: number = 240
 }

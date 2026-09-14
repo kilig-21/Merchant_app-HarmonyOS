@@ -10,13 +10,23 @@ export interface ApiResponse<T> {
 
 export class RequestOptions {
   method?: http.RequestMethod
-  query?: Record<string, string | number | boolean | undefined>
+  query?: QueryParam[]
   body?: Object
 
-  constructor(method?: http.RequestMethod, body?: Object, query?: Record<string, string | number | boolean | undefined>) {
+  constructor(method?: http.RequestMethod, body?: Object, query?: QueryParam[]) {
     this.method = method
     this.body = body
     this.query = query
+  }
+}
+
+export class QueryParam {
+  key: string
+  value: string | number | boolean
+
+  constructor(key: string, value: string | number | boolean) {
+    this.key = key
+    this.value = value
   }
 }
 
@@ -104,7 +114,7 @@ export class HttpClient {
   private static buildUrl(
     baseUrl: string,
     path: string,
-    query?: Record<string, string | number | boolean | undefined>
+    query?: QueryParam[]
   ): string {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`
     if (query === undefined) {
@@ -112,11 +122,8 @@ export class HttpClient {
     }
 
     const pairs: string[] = []
-    Object.keys(query).forEach((key: string) => {
-      const value = query[key]
-      if (value !== undefined) {
-        pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
-      }
+    query.forEach((item: QueryParam) => {
+      pairs.push(`${encodeURIComponent(item.key)}=${encodeURIComponent(String(item.value))}`)
     })
 
     if (pairs.length === 0) {
