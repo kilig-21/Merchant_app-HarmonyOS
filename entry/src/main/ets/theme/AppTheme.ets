@@ -4,16 +4,17 @@
  */
 export class AppColors {
   static readonly BACKGROUND: string = '#F7F5EF'
-  static readonly SURFACE: string = '#FFFFFF'
-  static readonly BRAND: string = '#215C49'
-  static readonly BRAND_SOFT: string = '#E5F0EA'
-  static readonly ACCENT: string = '#C45F3B'
-  static readonly ACCENT_SOFT: string = '#FFF0DF'
-  static readonly TEXT_PRIMARY: string = '#18352C'
-  static readonly TEXT_SECONDARY: string = '#66776F'
-  static readonly TEXT_TERTIARY: string = '#8A9690'
-  static readonly DIVIDER: string = '#E8ECE8'
-  static readonly DANGER: string = '#B94B3A'
+  static readonly SURFACE: string = '#FFFEF9'
+  static readonly BRAND: string = '#24352C'
+  static readonly BRAND_SOFT: string = '#E8EDE4'
+  static readonly ACCENT: string = '#B95E40'
+  static readonly ACCENT_SOFT: string = '#F9E9DE'
+  static readonly TEXT_PRIMARY: string = '#24352C'
+  static readonly TEXT_SECONDARY: string = '#667168'
+  static readonly TEXT_TERTIARY: string = '#899188'
+  static readonly DIVIDER: string = '#DCE0D7'
+  static readonly DANGER: string = '#A64B39'
+  static readonly SUCCESS: string = '#5C704A'
 }
 
 export class AppSpacing {
@@ -26,7 +27,7 @@ export class AppSpacing {
 }
 
 export class AppRadius {
-  static readonly CARD: number = 22
-  static readonly CONTROL: number = 16
-  static readonly PILL: number = 24
+  static readonly CARD: number = 18
+  static readonly CONTROL: number = 12
+  static readonly PILL: number = 26
 }

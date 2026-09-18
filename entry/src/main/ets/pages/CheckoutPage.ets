@@ -63,19 +63,24 @@ export struct CheckoutPage {
     Column({ space: AppSpacing.ITEM }) {
       Row() {
         Text('‹').fontSize(32).width(42).height(42).textAlign(TextAlign.Center).fontColor(AppColors.TEXT_PRIMARY).onClick(this.onBack)
-        Text(this.result === null ? '确认订单' : '提交结果').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1)
+        Column({ space: 2 }) {
+          Text(this.result === null ? '确认订单' : '提交结果').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
+          Text(this.result === null ? '确认地址与商品信息' : '订单状态以服务端为准').fontSize(10).fontColor(AppColors.TEXT_TERTIARY)
+        }.alignItems(HorizontalAlign.Start).layoutWeight(1)
       }.width('100%')
       if (this.result !== null) {
-        Column({ space: 14 }) {
-          Text('订单已提交').fontSize(25).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
+        Column({ space: 16 }) {
+          Text('✓').fontSize(20).fontColor(AppColors.SURFACE).width(42).height(42).textAlign(TextAlign.Center).padding({ top: 9 }).backgroundColor(AppColors.SUCCESS).borderRadius(21)
+          Text('订单已提交').fontSize(26).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
           Text('等待支付。当前 App 不提供模拟付款。').fontSize(13).fontColor(AppColors.TEXT_SECONDARY)
           Column({ space: 9 }) {
+            Text('订单确认').fontSize(11).letterSpacing(1).fontColor(AppColors.SUCCESS)
             Text(`结算单号：${this.result.checkoutNo}`).fontSize(13).fontColor(AppColors.TEXT_SECONDARY)
             Text(`后端确认金额：¥ ${this.result.totalAmount.toFixed(2)}`).fontSize(18).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY)
             Text(`已创建 ${this.result.orders.length} 个订单`).fontSize(13).fontColor(AppColors.TEXT_SECONDARY)
           }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.BRAND_SOFT).borderRadius(AppRadius.CARD)
           Button('查看我的订单').width('100%').height(46).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).onClick(this.onOpenOrders)
-        }.width('100%').padding(AppSpacing.CARD).backgroundColor('#FFFFFF').borderRadius(AppRadius.CARD)
+        }.width('100%').padding(22).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
       } else if (this.loading) {
         PageStateView({ type: PageStateType.Loading, title: '正在准备订单', description: '正在读取可用地址。' })
       } else if (this.error.length > 0 && this.addresses.length === 0) {
@@ -85,7 +90,7 @@ export struct CheckoutPage {
       } else {
         Scroll() {
           Column({ space: AppSpacing.ITEM }) {
-            Text('收货地址').fontSize(13).fontColor(AppColors.TEXT_SECONDARY).width('100%')
+            Row() { Text('收货地址').fontSize(15).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY); Blank(); Text(`${this.addresses.length} 个可用地址`).fontSize(11).fontColor(AppColors.TEXT_TERTIARY) }.width('100%')
             ForEach(this.addresses, (address: Address) => {
               Row({ space: 10 }) {
                 Radio({ value: address.id.toString(), group: 'checkout-address' }).checked(this.selectedAddressId === address.id).onChange(() => this.selectedAddressId = address.id)
@@ -93,21 +98,23 @@ export struct CheckoutPage {
                   Text(`${address.receiverName}  ${address.receiverPhone}`).fontSize(15).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY)
                   Text(`${address.province}${address.city}${address.district}${address.detailAddress}`).fontSize(12).lineHeight(18).fontColor(AppColors.TEXT_SECONDARY)
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-              }.width('100%').padding(AppSpacing.CARD).backgroundColor('#FFFFFF').borderRadius(AppRadius.CARD).onClick(() => this.selectedAddressId = address.id)
+              }.width('100%').padding(AppSpacing.CARD).backgroundColor(this.selectedAddressId === address.id ? AppColors.BRAND_SOFT : AppColors.SURFACE)
+                .border({ width: 1, color: this.selectedAddressId === address.id ? AppColors.BRAND : AppColors.DIVIDER })
+                .borderRadius(AppRadius.CARD).stateStyles({ pressed: { opacity: 0.72 } }).onClick(() => this.selectedAddressId = address.id)
             }, (address: Address) => address.id.toString())
             Button('管理收货地址').width('100%').height(42).backgroundColor(AppColors.BRAND_SOFT).fontColor(AppColors.BRAND).borderRadius(AppRadius.CONTROL).onClick(this.onOpenAddresses)
-            Text('已选商品').fontSize(13).fontColor(AppColors.TEXT_SECONDARY).width('100%').margin({ top: 6 })
+            Text('已选商品').fontSize(15).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY).width('100%').margin({ top: 6 })
             ForEach(this.cart.selectedItems(), (item: CartItem) => {
               Row() {
                 Column({ space: 5 }) { Text(item.productName).fontSize(14).fontColor(AppColors.TEXT_PRIMARY); Text(`${item.skuName} × ${item.quantity}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY) }.layoutWeight(1).alignItems(HorizontalAlign.Start)
                 Text(`¥ ${Money.format(Money.cents(item.salePrice) * item.quantity)}`).fontSize(14).fontColor(AppColors.TEXT_PRIMARY)
-              }.width('100%').padding(AppSpacing.CARD).backgroundColor('#FFFFFF').borderRadius(AppRadius.CARD)
+              }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
             }, (item: CartItem) => item.id.toString())
             Text(`商品预估金额：¥ ${this.cart.selectedSubtotal()}。成交金额以后端结算结果为准。`).fontSize(12).lineHeight(19).fontColor(AppColors.TEXT_SECONDARY).width('100%')
             if (this.error.length > 0) { Text(this.error).fontSize(12).lineHeight(19).fontColor(AppColors.DANGER).width('100%') }
           }.width('100%').padding({ bottom: 20 })
         }.width('100%').layoutWeight(1).scrollBar(BarState.Off)
-        Button(this.submitting ? '正在提交订单…' : '提交订单').width('100%').height(48).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).enabled(!this.submitting && this.cart.selectedItems().length > 0).onClick(() => this.submit())
+        Button(this.submitting ? '正在提交订单…' : `提交订单 · ¥ ${this.cart.selectedSubtotal()}`).width('100%').height(50).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).enabled(!this.submitting && this.cart.selectedItems().length > 0).onClick(() => this.submit())
       }
       Blank().height(76)
     }.width('100%').height('100%').padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)

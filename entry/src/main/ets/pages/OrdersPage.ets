@@ -87,7 +87,13 @@ export struct OrdersPage {
 
   build() {
     Column({ space: AppSpacing.ITEM }) {
-      Row() { Text('‹').fontSize(32).width(42).height(42).textAlign(TextAlign.Center).fontColor(AppColors.TEXT_PRIMARY).onClick(this.onBack); Text('我的订单').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1) }.width('100%')
+      Row() {
+        Text('‹').fontSize(32).width(42).height(42).textAlign(TextAlign.Center).fontColor(AppColors.TEXT_PRIMARY).onClick(this.onBack)
+        Column({ space: 2 }) {
+          Text('我的订单').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
+          Text('订单状态以服务端最新结果为准').fontSize(10).fontColor(AppColors.TEXT_TERTIARY)
+        }.alignItems(HorizontalAlign.Start).layoutWeight(1)
+      }.width('100%')
       if (this.loading) {
         PageStateView({ type: PageStateType.Loading, title: '正在读取订单', description: '稍等片刻。' })
       } else if (this.error.length > 0 && this.orders.length === 0) {
@@ -99,11 +105,16 @@ export struct OrdersPage {
           Column({ space: 12 }) {
             if (this.error.length > 0) { Text(this.error).width('100%').fontSize(12).fontColor(AppColors.DANGER) }
             ForEach(this.orders, (order: OrderDetail) => {
-              Column({ space: 10 }) {
-                Row() { Text(`订单 ${order.orderNo}`).fontSize(13).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1); Text(this.statusText(order.status)).fontSize(12).fontColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT : AppColors.BRAND) }.width('100%')
+              Column({ space: 12 }) {
+                Row() {
+                  Text(`订单 ${order.orderNo}`).fontSize(13).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1)
+                  Text(this.statusText(order.status)).fontSize(11).fontColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT : AppColors.BRAND)
+                    .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+                    .backgroundColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT_SOFT : AppColors.BRAND_SOFT).borderRadius(10)
+                }.width('100%')
                 Text(`${order.items.length} 件商品 · 创建于 ${order.createdAt}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).width('100%')
-                Row() { Blank(); Text(`¥ ${order.totalAmount.toFixed(2)}`).fontSize(17).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY); Button('查看详情', { type: ButtonType.Normal }).height(34).fontSize(12).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(14).margin({ left: 12 }).onClick(() => this.openDetail(order.id)) }.width('100%')
-              }.width('100%').padding(AppSpacing.CARD).backgroundColor('#FFFFFF').borderRadius(AppRadius.CARD)
+                Row() { Blank(); Text(`¥ ${order.totalAmount.toFixed(2)}`).fontSize(18).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY); Button('查看详情', { type: ButtonType.Normal }).height(36).fontSize(12).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).margin({ left: 12 }).onClick(() => this.openDetail(order.id)) }.width('100%')
+              }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
             }, (order: OrderDetail) => order.id.toString())
           }.width('100%').padding({ top: 4, bottom: 22 })
         }.width('100%').layoutWeight(1).scrollBar(BarState.Off)

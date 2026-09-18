@@ -23,7 +23,7 @@ export struct CartItemCard {
           .enabled(!this.busy && this.item.purchasable).onChange(this.onSelect)
           .accessibilityText(`选择${this.item.productName} ${this.item.skuName}`)
         Image(ProductArtwork.resolve(this.item.productId)).width(76).height(94).objectFit(ImageFit.Cover)
-          .borderRadius(6).onClick(this.onOpen).accessibilityText(`查看${this.item.productName}`)
+          .borderRadius(BrowseTheme.RADIUS).onClick(this.onOpen).accessibilityText(`查看${this.item.productName}`)
         Column({ space: 7 }) {
           Text(this.item.productName).fontSize(16).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
             .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).onClick(this.onOpen)
@@ -42,5 +42,6 @@ export struct CartItemCard {
           disabled: this.busy || this.item.availableStock === 0, onChange: this.onQuantityChange })
       }.width('100%')
     }.width('100%').padding({ top: 16, bottom: 12 })
+      .stateStyles({ pressed: { opacity: 0.78 } })
   }
 }

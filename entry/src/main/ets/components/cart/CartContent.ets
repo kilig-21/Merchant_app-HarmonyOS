@@ -130,7 +130,8 @@ export struct CartContent {
                       onRemove: () => this.confirmRemove([item.id]),
                       onOpen: () => this.onOpenProduct(item.storeId, item.productId, item.skuId) })
                   }, (item: CartItem) => item.id.toString())
-                }.width('100%').padding(14).backgroundColor('#FFFFFF').borderRadius(8)
+                }.width('100%').padding(14).backgroundColor('#FFFEF9').borderRadius(BrowseTheme.RADIUS)
+                  .border({ width: 1, color: BrowseTheme.LINE })
               }, (group: CartGroup) => group.storeId.toString())
             }
           }
@@ -139,7 +140,7 @@ export struct CartContent {
           } else if (this.cart.message.length > 0) {
             Text(this.cart.message).fontSize(12).fontColor(BrowseTheme.OLIVE).width('100%')
           }
-          Text('本地演示 · 本次打开 App 期间保留').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
+          Text('库存与可购状态以当前读取结果为准。').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
         }.width('100%').constraintSize({ maxWidth: 640 }).padding({ top: 20, bottom: 20, left: 4, right: 4 })
       }
       .width('100%')
@@ -162,7 +163,8 @@ export struct CartContent {
             .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER).fontSize(15).borderRadius(8)
             .enabled(!this.cart.busy && this.cart.error.length === 0 && this.cart.selectedCount() > 0)
             .onClick(() => this.showReview = true)
-        }.width('100%').padding({ left: 14, right: 14, top: 10, bottom: 10 }).backgroundColor('#FFFFFF').borderRadius(8)
+        }.width('100%').padding({ left: 14, right: 14, top: 10, bottom: 10 }).backgroundColor('#FFFEF9').borderRadius(BrowseTheme.RADIUS)
+          .border({ width: 1, color: BrowseTheme.LINE })
       }
       Blank().height(82)
     }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)

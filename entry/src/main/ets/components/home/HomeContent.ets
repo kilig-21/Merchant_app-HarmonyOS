@@ -68,12 +68,15 @@ export struct HomeContent {
     Scroll() {
       Column({ space: 24 }) {
         Row() {
-          Text('拾光集 / 消费者商城').fontSize(12).fontColor(BrowseTheme.OLIVE)
+          Text('SHIGUANG MARKET / 2026').fontSize(10).letterSpacing(1.2).fontColor(BrowseTheme.OLIVE)
           Blank()
-          Text('本地演示').fontSize(10).fontColor(BrowseTheme.MUTED)
+          Text('今日选物').fontSize(10).fontColor(BrowseTheme.MUTED)
         }.width('100%')
-        Text('发现好物，\n从这里开始。').fontSize(31).lineHeight(43).fontWeight(FontWeight.Medium)
+        Row({ space: 12 }) {
+          Text('发现好物，\n从这里开始。').fontSize(32).lineHeight(43).fontWeight(FontWeight.Medium)
           .fontColor(BrowseTheme.INK).width('100%')
+          Text('01').fontSize(12).fontColor(BrowseTheme.OLIVE).margin({ top: 8 })
+        }.width('100%').alignItems(VerticalAlign.Top)
         Search({ value: this.keyword, placeholder: '搜索商品或店铺' }).height(48)
           .textFont({ size: 14 }).placeholderFont({ size: 14 }).placeholderColor(BrowseTheme.MUTED)
           .backgroundColor(BrowseTheme.WASH).borderRadius(8)
@@ -88,7 +91,8 @@ export struct HomeContent {
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
               Text('逛\n店').fontSize(22).lineHeight(32).fontColor('#D2D5C9')
             }.width('100%').padding(22)
-          }.width('100%').padding(0).backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onNavigate(1))
+          }.width('100%').padding(0).backgroundColor(BrowseTheme.INK).borderRadius(BrowseTheme.RADIUS)
+            .shadow({ radius: 18, color: '#2E24352C', offsetX: 0, offsetY: 7 }).onClick(() => this.onNavigate(1))
           Row({ space: 12 }) {
             Button({ type: ButtonType.Normal }) {
               Row() {
@@ -98,9 +102,9 @@ export struct HomeContent {
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
                 Text('↗').fontSize(20).fontColor(BrowseTheme.OLIVE)
               }.padding(16).width('100%')
-            }.layoutWeight(1).padding(0).backgroundColor(BrowseTheme.WASH).borderRadius(8).onClick(() => this.onNavigate(2))
+            }.layoutWeight(1).padding(0).backgroundColor(BrowseTheme.WASH).borderRadius(BrowseTheme.RADIUS).onClick(() => this.onNavigate(2))
             Button('我的 ›', { type: ButtonType.Normal }).width(88).height(72).padding(8).fontSize(14)
-              .fontColor(BrowseTheme.INK).backgroundColor('#EFEBDF').borderRadius(8).onClick(() => this.onNavigate(3))
+              .fontColor(BrowseTheme.INK).backgroundColor('#EFEBDF').borderRadius(BrowseTheme.RADIUS).onClick(() => this.onNavigate(3))
           }.width('100%')
         }
         Row() {

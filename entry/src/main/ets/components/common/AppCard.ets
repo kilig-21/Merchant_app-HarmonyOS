@@ -19,8 +19,9 @@ export struct AppCard {
         .fontColor(AppColors.BRAND)
         .textAlign(TextAlign.Center)
         .padding({ top: 10 })
-        .backgroundColor(AppColors.BRAND_SOFT)
-        .borderRadius(14)
+        .backgroundColor(AppColors.SURFACE)
+        .border({ width: 1, color: AppColors.DIVIDER })
+        .borderRadius(AppRadius.CONTROL)
 
       Column({ space: 4 }) {
         if (this.eyebrow.length > 0) {
@@ -40,14 +41,17 @@ export struct AppCard {
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
-      Text('›')
-        .fontSize(22)
-        .fontColor(AppColors.TEXT_TERTIARY)
+      Text('↗')
+        .fontSize(16)
+        .fontColor(AppColors.BRAND)
     }
     .width('100%')
     .padding(AppSpacing.CARD)
     .backgroundColor(this.cardBackground)
     .borderRadius(AppRadius.CARD)
+    .border({ width: 1, color: AppColors.DIVIDER })
+    .shadow({ radius: 12, color: '#120F2118', offsetX: 0, offsetY: 5 })
+    .stateStyles({ pressed: { opacity: 0.72 } })
     .onClick(() => this.onCardClick())
   }
 }

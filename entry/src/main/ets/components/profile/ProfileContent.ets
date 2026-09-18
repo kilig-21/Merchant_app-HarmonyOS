@@ -1,5 +1,5 @@
 import { AppCard } from '../common/AppCard'
-import { AppColors } from '../../theme/AppTheme'
+import { AppColors, AppRadius } from '../../theme/AppTheme'
 import { common } from '@kit.AbilityKit'
 import { AuthApi } from '../../api/AuthApi'
 import { AuthSession } from '../../model/AuthModels'
@@ -127,7 +127,7 @@ export struct ProfileContent {
       Text(this.registerMode ? '已有账号，去登录' : '没有账号，去注册')
         .fontSize(12).fontColor('#4D7563').padding(4)
         .onClick(() => { this.registerMode = !this.registerMode; this.authMessage = '' })
-    }.width('100%').padding(18).backgroundColor('#FFFFFF').borderRadius(24)
+    }.width('100%').padding(18).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
   }
 
   @Builder
@@ -136,14 +136,17 @@ export struct ProfileContent {
       Text(icon).width(38).height(38).fontSize(18).textAlign(TextAlign.Center).padding({ top: 9 }).backgroundColor('#EDF2EC').borderRadius(13)
       Column({ space: 3 }) { Text(title).fontSize(15).fontWeight(FontWeight.Medium).fontColor('#294238'); Text(detail).fontSize(11).fontColor('#839089') }.alignItems(HorizontalAlign.Start).layoutWeight(1)
       Text('›').fontSize(23).fontColor('#A1ABA5')
-    }.width('100%').padding({ top: 12, bottom: 12 }).onClick(() => { this.notice = message; onAction() })
+    }.width('100%').padding({ top: 12, bottom: 12 }).stateStyles({ pressed: { opacity: 0.7 } }).onClick(() => { this.notice = message; onAction() })
   }
 
   build() {
     Column() {
       Scroll() {
         Column({ space: 20 }) {
-          Text('我的').fontSize(25).fontWeight(FontWeight.Bold).fontColor('#18352C').width('100%').margin({ top: 15 })
+          Column({ space: 3 }) {
+            Text('我的').fontSize(26).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
+            Text('账户、订单与常用服务').fontSize(11).fontColor(AppColors.TEXT_TERTIARY)
+          }.width('100%').alignItems(HorizontalAlign.Start).margin({ top: 15 })
           Row({ space: 14 }) {
             Stack({ alignContent: Alignment.Center }) { Circle({ width: 62, height: 62 }).fill('#215C49'); Text('客').fontSize(23).fontWeight(FontWeight.Medium).fontColor('#FFFFFF') }
             Column({ space: 5 }) {
@@ -152,7 +155,8 @@ export struct ProfileContent {
             }.alignItems(HorizontalAlign.Start).layoutWeight(1)
             Text(this.username.length > 0 ? '退出' : '去登录').fontSize(12).fontColor('#FFFFFF').padding({ left: 13, right: 13, top: 8, bottom: 8 }).backgroundColor('#215C49').borderRadius(15)
               .onClick(() => { if (this.username.length > 0) { this.signOut(true) } else { this.authPanelVisible = true } })
-          }.width('100%').padding(18).backgroundColor('#FFFFFF').borderRadius(24)
+          }.width('100%').padding(18).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD)
+            .border({ width: 1, color: AppColors.DIVIDER }).shadow({ radius: 12, color: '#120F2118', offsetX: 0, offsetY: 5 })
 
           if (this.authPanelVisible) {
             this.authPanel()
@@ -161,12 +165,12 @@ export struct ProfileContent {
           Column({ space: 14 }) {
             Row() { Text('我的订单').fontSize(18).fontWeight(FontWeight.Bold).fontColor('#263D34'); Blank(); Text('全部订单 →').fontSize(12).fontColor('#718078').onClick(this.onOpenOrders) }.width('100%')
             Row() {
-              Column({ space: 7 }) { Text('◷').fontSize(22).fontColor('#C45F3B'); Text('待付款').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).onClick(() => this.notice = '暂无待付款订单')
-              Column({ space: 7 }) { Text('□').fontSize(22).fontColor('#5D8171'); Text('已付款').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).onClick(() => this.notice = '已付款订单将在这里展示')
+              Column({ space: 7 }) { Text('◷').fontSize(22).fontColor('#C45F3B'); Text('待付款').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).stateStyles({ pressed: { opacity: 0.65 } }).onClick(this.onOpenOrders)
+              Column({ space: 7 }) { Text('□').fontSize(22).fontColor('#5D8171'); Text('已付款').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).stateStyles({ pressed: { opacity: 0.65 } }).onClick(this.onOpenOrders)
               Column({ space: 7 }) { Text('↶').fontSize(22).fontColor('#B0864A'); Text('退款/售后').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).onClick(() => this.notice = '售后记录将在这里展示')
-              Column({ space: 7 }) { Text('…').fontSize(22).fontColor('#7A8A81'); Text('全部').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).onClick(() => this.notice = '订单中心将在这里展示')
+              Column({ space: 7 }) { Text('…').fontSize(22).fontColor('#7A8A81'); Text('全部').fontSize(12).fontColor('#4B5D54') }.layoutWeight(1).stateStyles({ pressed: { opacity: 0.65 } }).onClick(this.onOpenOrders)
             }.width('100%')
-          }.width('100%').padding(18).backgroundColor('#FFFFFF').borderRadius(24)
+          }.width('100%').padding(18).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
 
           Column() {
             this.actionItem('⌂', '收货地址', '管理常用收货信息', '', this.onOpenAddresses)
@@ -174,7 +178,7 @@ export struct ProfileContent {
             this.actionItem('♧', '售后服务', '申请售后与查看进度', '售后服务界面待接入')
             Divider().color('#EEF0EC').strokeWidth(1)
             this.actionItem('⚙', '设置', '隐私、账号与帮助', '设置界面待接入')
-          }.width('100%').padding({ left: 17, right: 17, top: 4, bottom: 4 }).backgroundColor('#FFFFFF').borderRadius(24)
+          }.width('100%').padding({ left: 17, right: 17, top: 4, bottom: 4 }).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
 
           AppCard({
             eyebrow: '拾光集 · 消费者商城',

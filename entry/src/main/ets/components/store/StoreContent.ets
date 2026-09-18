@@ -100,7 +100,7 @@ export struct StoreContent {
           Row() {
             Text('日常选物 / 店铺目录').fontSize(11).fontColor(BrowseTheme.OLIVE).letterSpacing(1)
             Blank()
-            Text('本地演示').fontSize(10).fontColor(BrowseTheme.MUTED)
+            Text('慢选日常').fontSize(10).fontColor(BrowseTheme.MUTED)
               .padding({ left: 8, right: 8, top: 4, bottom: 4 }).border({ width: 1, color: BrowseTheme.LINE })
           }.width('100%')
           Row({ space: 12 }) {

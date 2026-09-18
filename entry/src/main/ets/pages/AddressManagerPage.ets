@@ -104,7 +104,7 @@ export struct AddressManagerPage {
     Column({ space: AppSpacing.ITEM }) {
       Row() {
         Text('‹').fontSize(32).width(42).height(42).textAlign(TextAlign.Center).fontColor(AppColors.TEXT_PRIMARY).onClick(this.onBack)
-        Text('收货地址').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1)
+        Column({ space: 2 }) { Text('收货地址').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY); Text('配送信息仅用于订单收货').fontSize(10).fontColor(AppColors.TEXT_TERTIARY) }.alignItems(HorizontalAlign.Start).layoutWeight(1)
         Button('新增', { type: ButtonType.Normal }).height(36).fontSize(13).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(15).onClick(() => this.openEditor())
       }.width('100%')
       if (this.loading) {
@@ -126,7 +126,7 @@ export struct AddressManagerPage {
                 }.width('100%')
                 Text(`${address.province}${address.city}${address.district}${address.detailAddress}`).width('100%').fontSize(13).lineHeight(20).fontColor(AppColors.TEXT_SECONDARY)
                 Row() { Blank(); Text('编辑').fontSize(12).fontColor(AppColors.BRAND).padding(6).onClick(() => this.openEditor(address)); Text('删除').fontSize(12).fontColor(AppColors.DANGER).padding(6).onClick(() => this.confirmRemove(address)) }.width('100%')
-              }.width('100%').padding(AppSpacing.CARD).backgroundColor('#FFFFFF').borderRadius(AppRadius.CARD)
+              }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
             }, (address: Address) => address.id.toString())
           }.width('100%').padding({ top: 4, bottom: 22 })
         }.layoutWeight(1).width('100%').scrollBar(BarState.Off)

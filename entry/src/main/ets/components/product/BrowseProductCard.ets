@@ -13,7 +13,8 @@ export struct BrowseProductCard {
     Column({ space: 10 }) {
       Stack({ alignContent: Alignment.TopStart }) {
         Image(this.artwork).width('100%').aspectRatio(0.86).objectFit(ImageFit.Cover)
-        Text(this.sequence).fontSize(11).fontColor(BrowseTheme.MUTED).margin(12)
+        Text(this.sequence).fontSize(10).fontColor(BrowseTheme.INK).letterSpacing(1)
+          .padding({ left: 8, right: 8, top: 5, bottom: 5 }).backgroundColor('#DDF0E7E0').borderRadius(10).margin(10)
         if (this.product.totalAvailableStock === 0) {
           Text('暂时售罄').fontSize(11).fontColor(BrowseTheme.INK)
             .padding({ left: 9, right: 9, top: 5, bottom: 5 })
@@ -29,9 +30,11 @@ export struct BrowseProductCard {
         Text(this.product.minSalePrice.toFixed(2)).fontSize(20).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
         Text('起').fontSize(11).fontColor(BrowseTheme.MUTED)
         Blank()
-        Text('↗').fontSize(18).fontColor(BrowseTheme.OLIVE)
+        Text('查看').fontSize(11).fontColor(BrowseTheme.OLIVE)
       }.width('100%').alignItems(VerticalAlign.Bottom)
     }.width('100%').alignItems(HorizontalAlign.Start)
+      .padding({ left: 2, right: 2, top: 2, bottom: 6 })
+      .stateStyles({ pressed: { opacity: 0.66 } })
       .onClick(() => this.onOpen(this.product.id))
       .accessibilityText(`${this.product.name}，${this.product.minSalePrice.toFixed(2)}元起，查看商品概览`)
       .focusable(true)

@@ -135,7 +135,7 @@ export struct ProductDetailPage {
         Button('‹', { type: ButtonType.Normal }).width(44).height(44).fontSize(32).padding(0)
           .fontColor(BrowseTheme.INK).backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
         Text('商品详情').layoutWeight(1).textAlign(TextAlign.Center).fontSize(16).fontColor(BrowseTheme.INK)
-        Text('演示').width(44).textAlign(TextAlign.Center).fontSize(11).fontColor(BrowseTheme.MUTED)
+        Text('选物').width(44).textAlign(TextAlign.Center).fontSize(11).fontColor(BrowseTheme.OLIVE)
       }.width('100%').padding({ left: 8, right: 8 })
       if (this.loading) {
         Column() { PageStateView({ type: PageStateType.Loading, title: '正在打开商品', description: '稍等片刻。' }) }
@@ -191,7 +191,7 @@ export struct ProductDetailPage {
               this.informationRow('当前库存', this.selectedSku() === undefined ? '暂无可购规格' : `${this.stock()} 件，以所选规格为准`)
               this.informationRow('商品说明', this.detail.description)
             }.width('100%').alignItems(HorizontalAlign.Start)
-            Text('当前为本地演示商品，不产生真实交易。').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
+            Text('商品图片为示意图，价格与库存以当前页面结果为准。').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
           }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 20, right: 20, top: 8, bottom: 28 })
         }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
         if (this.feedback.length > 0) {
@@ -201,10 +201,10 @@ export struct ProductDetailPage {
         Row({ space: 12 }) {
           Button(`购物车 ${this.cart.count() > 0 ? this.cart.count() : ''}`, { type: ButtonType.Normal })
             .fontSize(13).fontColor(BrowseTheme.INK).backgroundColor(BrowseTheme.WASH)
-            .width(102).height(48).borderRadius(8).onClick(this.onOpenCart)
+            .width(102).height(50).borderRadius(BrowseTheme.RADIUS).onClick(this.onOpenCart)
           Button(this.cart.busy ? '正在加入…' : this.stock() === 0 ? '暂时售罄' : '加入购物车', { type: ButtonType.Normal })
-            .layoutWeight(1).height(48).fontSize(16).fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK)
-            .borderRadius(8).enabled(this.canBuy()).onClick(() => this.addToCart())
+            .layoutWeight(1).height(50).fontSize(16).fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK)
+            .borderRadius(BrowseTheme.RADIUS).enabled(this.canBuy()).onClick(() => this.addToCart())
         }.width('100%').padding({ left: 20, right: 20, top: 12, bottom: 16 }).backgroundColor(BrowseTheme.PAPER)
       }
     }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)

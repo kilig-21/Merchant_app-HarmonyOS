@@ -14,7 +14,7 @@ export struct FloatingTabBar {
         .fontSize(index === this.selectedIndex ? 20 : 18)
         .lineHeight(22)
         .fontWeight(index === this.selectedIndex ? FontWeight.Medium : FontWeight.Regular)
-        .fontColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_TERTIARY)
+        .fontColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
         .scale({
           x: index === this.selectedIndex ? 1.08 : 1,
           y: index === this.selectedIndex ? 1.08 : 1
@@ -31,7 +31,7 @@ export struct FloatingTabBar {
         .fontSize(11)
         .lineHeight(15)
         .fontWeight(index === this.selectedIndex ? FontWeight.Medium : FontWeight.Regular)
-        .fontColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_TERTIARY)
+        .fontColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
         .animation({ duration: 200, curve: Curve.EaseInOut })
     }
     .layoutWeight(1)
@@ -51,7 +51,7 @@ export struct FloatingTabBar {
       .width('25%')
       .height(50)
       .backgroundColor(AppColors.BRAND)
-      .borderRadius(18)
+      .borderRadius(20)
       .translate({ x: `${this.selectedIndex * 100}%` })
       .shadow({
         radius: 10,
@@ -74,6 +74,7 @@ export struct FloatingTabBar {
     .height(60)
     .padding(5)
     .backgroundColor(AppColors.SURFACE)
+    .border({ width: 1, color: AppColors.DIVIDER })
     .borderRadius(AppRadius.PILL)
     .constraintSize({ maxWidth: 328 })
     .clip(false)

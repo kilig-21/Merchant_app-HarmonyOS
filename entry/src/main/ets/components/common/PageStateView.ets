@@ -16,14 +16,14 @@ export struct PageStateView {
   onAction: () => void = () => {}
 
   build() {
-    Column({ space: 10 }) {
+    Column({ space: 11 }) {
       if (this.type === PageStateType.Loading) {
         LoadingProgress()
           .width(30)
           .height(30)
           .color(AppColors.BRAND)
       } else {
-        Text(this.type === PageStateType.Empty ? '◇' : '!')
+        Text(this.type === PageStateType.Empty ? '○' : '!')
           .width(42)
           .height(42)
           .fontSize(22)
@@ -62,5 +62,6 @@ export struct PageStateView {
     .padding({ left: AppSpacing.CARD, right: AppSpacing.CARD, top: 20, bottom: 20 })
     .backgroundColor(AppColors.SURFACE)
     .borderRadius(AppRadius.CARD)
+    .border({ width: 1, color: AppColors.DIVIDER })
   }
 }
