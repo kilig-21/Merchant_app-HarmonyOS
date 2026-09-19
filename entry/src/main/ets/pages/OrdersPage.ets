@@ -1,126 +1,199 @@
 import { OrderApi } from '../api/OrderApi'
 import { OrderDetail, OrderItem } from '../model/OrderModels'
 import { Money } from '../utils/Money'
-import { AppColors, AppRadius, AppSpacing } from '../theme/AppTheme'
+import { OrderPresentation } from '../utils/OrderPresentation'
+import { AppColors, AppRadius } from '../theme/AppTheme'
 import { PageStateType, PageStateView } from '../components/common/PageStateView'
 
 @Component
 export struct OrdersPage {
+  @Prop initialFilter: string = ''
   onBack: () => void = () => {}
+  onBrowse: () => void = () => {}
+  @State filter: string = ''
   @State orders: OrderDetail[] = []
   @State loading: boolean = true
   @State error: string = ''
   @State detail: OrderDetail | null = null
   @State detailSheetVisible: boolean = false
   @State detailLoading: boolean = false
+  @State detailError: string = ''
   @State actionBusy: boolean = false
+  private selectedId: number = 0
+  private serial: number = 0
+  private alive: boolean = false
 
-  aboutToAppear(): void { this.load() }
-
+  aboutToAppear(): void { this.alive = true; this.filter = this.initialFilter; this.load() }
+  aboutToDisappear(): void { this.alive = false; this.serial++ }
   private async load(): Promise<void> {
     this.loading = true
     this.error = ''
-    try { this.orders = await OrderApi.list() }
-    catch (error) { this.error = error instanceof Error ? error.message : '订单加载失败，请重试' }
-    finally { this.loading = false }
+    try { const orders = await OrderApi.list(); if (this.alive) { this.orders = orders } }
+    catch (error) { if (this.alive) { this.error = error instanceof Error ? error.message : '订单加载失败，请重试' } }
+    finally { if (this.alive) { this.loading = false } }
   }
-
-  private statusText(status: string): string {
-    if (status === 'PENDING_PAYMENT') { return '待付款' }
-    if (status === 'PAID') { return '已付款' }
-    if (status === 'CANCELLED') { return '已取消' }
-    if (status === 'CLOSED') { return '已关闭' }
-    return status
-  }
-
-  private async openDetail(orderId: number): Promise<void> {
+  private async openDetail(id: number): Promise<void> {
+    const request = ++this.serial
+    this.selectedId = id
+    this.detail = null
+    this.detailSheetVisible = true
     this.detailLoading = true
-    this.error = ''
-    try { this.detail = await OrderApi.get(orderId); this.detailSheetVisible = true }
-    catch (error) { this.error = error instanceof Error ? error.message : '订单详情加载失败，请重试' }
-    finally { this.detailLoading = false }
+    this.detailError = ''
+    try {
+      const detail = await OrderApi.get(id)
+      if (this.alive && request === this.serial) { this.detail = detail }
+    } catch (error) {
+      if (this.alive && request === this.serial) { this.detailError = error instanceof Error ? error.message : '详情读取失败' }
+    } finally { if (this.alive && request === this.serial) { this.detailLoading = false } }
   }
-
   private confirmCancel(): void {
     if (this.detail === null || this.actionBusy) { return }
     this.getUIContext().showAlertDialog({
-      title: '取消订单？', message: '取消后订单状态以服务端返回结果为准。',
-      primaryButton: { value: '保留', action: () => {} },
+      title: '取消这笔订单？', message: '取消后可重新挑选商品，原订单将无法继续付款。',
+      primaryButton: { value: '保留订单', action: () => {} },
       secondaryButton: { value: '取消订单', fontColor: AppColors.DANGER, action: () => this.cancel() }
     })
   }
-
   private async cancel(): Promise<void> {
     if (this.detail === null || this.actionBusy) { return }
+    const id = this.detail.id
     this.actionBusy = true
-    try {
-      const orderId = this.detail.id
-      await OrderApi.cancel(orderId)
-      await this.load()
-      this.detail = await OrderApi.get(orderId)
-    } catch (error) { this.error = error instanceof Error ? error.message : '订单取消失败，请刷新后重试' }
-    finally { this.actionBusy = false }
+    this.detailError = ''
+    try { await OrderApi.cancel(id) }
+    catch (error) { this.detailError = error instanceof Error ? error.message : '取消结果未确认，请刷新查看' }
+    // 成功与冲突都重新读取；查询失败时禁用基于旧状态的取消操作。
+    try { this.detail = await OrderApi.get(id) }
+    catch (_) { this.detail = null; this.detailError = '订单状态暂时无法确认，请重新读取详情' }
+    await this.load()
+    this.actionBusy = false
   }
 
   @Builder
+  filterTab(label: string, status: string) {
+    Button(label, { type: ButtonType.Normal }).height(44).fontSize(13)
+      .padding({ left: 16, right: 16 }).borderRadius(22)
+      .backgroundColor(this.filter === status ? AppColors.BRAND : AppColors.SURFACE)
+      .fontColor(this.filter === status ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
+      .onClick(() => this.filter = status)
+  }
+  @Builder
   detailSheet() {
-    if (this.detail === null) {
-      Column() { PageStateView({ type: PageStateType.Loading, title: '正在读取订单', description: '稍等片刻。' }) }.width('100%').height('100%').justifyContent(FlexAlign.Center)
-    } else {
-      Column({ space: 14 }) {
-        Row() { Text('订单详情').fontSize(18).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1); Text('×').fontSize(24).fontColor(AppColors.TEXT_SECONDARY).padding(5).onClick(() => { this.detailSheetVisible = false; this.detail = null }) }.width('100%')
-        Text(this.statusText(this.detail.status)).fontSize(14).fontColor(AppColors.BRAND).padding({ left: 10, right: 10, top: 5, bottom: 5 }).backgroundColor(AppColors.BRAND_SOFT).borderRadius(10)
-        Text(`订单号：${this.detail.orderNo}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).width('100%')
-        ForEach(this.detail.items, (item: OrderItem) => {
-          Row() {
-            Column({ space: 4 }) { Text(item.skuNameSnapshot).fontSize(14).fontColor(AppColors.TEXT_PRIMARY); Text(`× ${item.quantity}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY) }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-            Text(`¥ ${Money.format(Money.cents(item.salePrice) * item.quantity)}`).fontSize(14).fontColor(AppColors.TEXT_PRIMARY)
-          }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.BACKGROUND).borderRadius(14)
-        }, (item: OrderItem) => item.id.toString())
-        Text(`收货地址：${this.detail.shippingAddress.receiverName} ${this.detail.shippingAddress.receiverPhone}\n${this.detail.shippingAddress.province}${this.detail.shippingAddress.city}${this.detail.shippingAddress.district}${this.detail.shippingAddress.detailAddress}`)
-          .width('100%').fontSize(12).lineHeight(19).fontColor(AppColors.TEXT_SECONDARY).padding(AppSpacing.CARD).backgroundColor(AppColors.BACKGROUND).borderRadius(14)
-        Row() { Text('后端确认金额').fontSize(14).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1); Text(`¥ ${this.detail.totalAmount.toFixed(2)}`).fontSize(21).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY) }.width('100%')
-        if (this.detail.status === 'PENDING_PAYMENT') { Button(this.actionBusy ? '正在取消…' : '取消订单').width('100%').height(46).backgroundColor(AppColors.SURFACE).fontColor(AppColors.DANGER).border({ width: 1, color: '#E6B7AF' }).borderRadius(AppRadius.CONTROL).enabled(!this.actionBusy).onClick(() => this.confirmCancel()) }
-      }.width('100%').height('100%').padding(AppSpacing.CARD)
-    }
+    Column({ space: 16 }) {
+      Row() {
+        Text('订单详情').fontSize(20).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND).layoutWeight(1)
+        Button('×', { type: ButtonType.Normal }).width(44).height(44).fontSize(25)
+          .backgroundColor(Color.Transparent).fontColor(AppColors.BRAND).enabled(!this.actionBusy)
+          .accessibilityText('关闭订单详情').onClick(() => { this.detailSheetVisible = false; this.serial++ })
+      }.width('100%')
+      if (this.detailLoading) {
+        PageStateView({ type: PageStateType.Loading, title: '正在读取订单', description: '' })
+      } else if (this.detail === null) {
+        PageStateView({ type: PageStateType.Error, title: '暂时无法打开订单', description: this.detailError,
+          onAction: () => this.openDetail(this.selectedId) })
+      } else {
+        Scroll() {
+          Column({ space: 20 }) {
+            Column({ space: 8 }) {
+              Text(OrderPresentation.status(this.detail.status)).fontSize(25).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND)
+              Text(this.detail.status === 'PENDING_PAYMENT' ? '订单已保留，当前版本暂未开放在线付款。' : '你可以在这里查看订单最新信息。')
+                .fontSize(13).lineHeight(21).fontColor(AppColors.TEXT_SECONDARY)
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(18).backgroundColor(AppColors.BRAND_SOFT).borderRadius(14)
+            Text('商品清单').fontSize(17).fontColor(AppColors.BRAND).width('100%')
+            ForEach(this.detail.items, (item: OrderItem) => {
+              Row({ space: 12 }) {
+                Text('物').width(44).height(52).textAlign(TextAlign.Center).padding({ top: 14 })
+                  .fontSize(18).fontColor(AppColors.BRAND).backgroundColor(AppColors.BRAND_SOFT).borderRadius(8)
+                Column({ space: 6 }) {
+                  Text(item.skuNameSnapshot).fontSize(15).fontColor(AppColors.BRAND)
+                  Text('数量 ' + item.quantity).fontSize(12).fontColor(AppColors.TEXT_SECONDARY)
+                }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+                Text('¥ ' + Money.format(Money.cents(item.salePrice) * item.quantity)).fontSize(15).fontColor(AppColors.BRAND)
+              }.width('100%')
+            }, (item: OrderItem) => item.id.toString())
+            Divider().color(AppColors.DIVIDER)
+            Column({ space: 8 }) {
+              Text('收货信息').fontSize(17).fontColor(AppColors.BRAND)
+              Text(this.detail.shippingAddress.receiverName + '  ' + this.detail.shippingAddress.receiverPhone)
+                .fontSize(14).fontColor(AppColors.BRAND)
+              Text(this.detail.shippingAddress.province + this.detail.shippingAddress.city + this.detail.shippingAddress.district + this.detail.shippingAddress.detailAddress)
+                .fontSize(13).lineHeight(22).fontColor(AppColors.TEXT_SECONDARY)
+            }.width('100%').alignItems(HorizontalAlign.Start)
+            Divider().color(AppColors.DIVIDER)
+            Text('订单编号  ' + this.detail.orderNo).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).width('100%').copyOption(CopyOptions.InApp)
+            Text('创建时间  ' + OrderPresentation.date(this.detail.createdAt)).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).width('100%')
+            Row() {
+              Text('订单金额').fontSize(14).fontColor(AppColors.BRAND)
+              Blank()
+              Text('¥ ' + this.detail.totalAmount.toFixed(2)).fontSize(24).fontColor(AppColors.BRAND)
+            }.width('100%')
+            if (this.detailError.length > 0) { Text(this.detailError).fontSize(13).lineHeight(21).fontColor(AppColors.DANGER) }
+          }.width('100%').padding({ bottom: 24 })
+        }.layoutWeight(1).width('100%').align(Alignment.Top).scrollBar(BarState.Off)
+        if (this.detail.status === 'PENDING_PAYMENT') {
+          Button(this.actionBusy ? '正在确认状态…' : '取消订单', { type: ButtonType.Normal }).width('100%').height(48)
+            .backgroundColor(AppColors.BACKGROUND).fontColor(AppColors.DANGER).borderRadius(12)
+            .enabled(!this.actionBusy).onClick(() => this.confirmCancel())
+        }
+      }
+    }.width('100%').height('100%').padding({ left: 22, right: 22, bottom: 24 })
   }
 
   build() {
-    Column({ space: AppSpacing.ITEM }) {
+    Column({ space: 16 }) {
       Row() {
-        Text('‹').fontSize(32).width(42).height(42).textAlign(TextAlign.Center).fontColor(AppColors.TEXT_PRIMARY).onClick(this.onBack)
-        Column({ space: 2 }) {
-          Text('我的订单').fontSize(19).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY)
-          Text('订单状态以服务端最新结果为准').fontSize(10).fontColor(AppColors.TEXT_TERTIARY)
-        }.alignItems(HorizontalAlign.Start).layoutWeight(1)
+        Button('‹', { type: ButtonType.Normal }).width(44).height(44).fontSize(30).fontColor(AppColors.BRAND)
+          .backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
+        Text('我的订单').fontSize(20).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND).layoutWeight(1)
+        Button('刷新', { type: ButtonType.Normal }).height(44).fontSize(13).fontColor(AppColors.BRAND)
+          .backgroundColor(Color.Transparent).enabled(!this.loading).onClick(() => this.load())
       }.width('100%')
+      Scroll() {
+        Row({ space: 8 }) {
+          this.filterTab('全部', '')
+          this.filterTab('待付款', 'PENDING_PAYMENT')
+          this.filterTab('已付款', 'PAID')
+          this.filterTab('已取消', 'CANCELLED')
+          this.filterTab('已关闭', 'CLOSED')
+        }
+      }.width('100%').scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off)
       if (this.loading) {
-        PageStateView({ type: PageStateType.Loading, title: '正在读取订单', description: '稍等片刻。' })
+        PageStateView({ type: PageStateType.Loading, title: '正在读取订单', description: '' })
       } else if (this.error.length > 0 && this.orders.length === 0) {
         PageStateView({ type: PageStateType.Error, title: '订单暂时无法加载', description: this.error, onAction: () => this.load() })
-      } else if (this.orders.length === 0) {
-        PageStateView({ type: PageStateType.Empty, title: '还没有订单', description: '提交订单后，会在这里显示真实状态。', actionLabel: '返回商城', onAction: this.onBack })
+      } else if (OrderPresentation.filter(this.orders, this.filter).length === 0) {
+        PageStateView({ type: PageStateType.Empty, title: this.filter.length > 0 ? '暂无' + OrderPresentation.status(this.filter) + '订单' : '还没有订单',
+          description: this.orders.length > 0 ? '切换其他状态查看已有订单，或继续挑选。' : '挑一件喜欢的商品，开启你的第一笔订单。',
+          actionLabel: '去逛逛', onAction: this.onBrowse })
       } else {
         Scroll() {
-          Column({ space: 12 }) {
-            if (this.error.length > 0) { Text(this.error).width('100%').fontSize(12).fontColor(AppColors.DANGER) }
-            ForEach(this.orders, (order: OrderDetail) => {
-              Column({ space: 12 }) {
-                Row() {
-                  Text(`订单 ${order.orderNo}`).fontSize(13).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1)
-                  Text(this.statusText(order.status)).fontSize(11).fontColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT : AppColors.BRAND)
-                    .padding({ left: 8, right: 8, top: 4, bottom: 4 })
-                    .backgroundColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT_SOFT : AppColors.BRAND_SOFT).borderRadius(10)
-                }.width('100%')
-                Text(`${order.items.length} 件商品 · 创建于 ${order.createdAt}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).width('100%')
-                Row() { Blank(); Text(`¥ ${order.totalAmount.toFixed(2)}`).fontSize(18).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY); Button('查看详情', { type: ButtonType.Normal }).height(36).fontSize(12).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).margin({ left: 12 }).onClick(() => this.openDetail(order.id)) }.width('100%')
-              }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
+          Column({ space: 14 }) {
+            if (this.error.length > 0) { Text(this.error).fontSize(13).fontColor(AppColors.DANGER) }
+            ForEach(OrderPresentation.filter(this.orders, this.filter), (order: OrderDetail) => {
+              Button({ type: ButtonType.Normal }) {
+                Column({ space: 16 }) {
+                  Row() {
+                    Text(OrderPresentation.date(order.createdAt)).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).layoutWeight(1)
+                    Text(OrderPresentation.status(order.status)).fontSize(12).fontColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT : AppColors.BRAND)
+                  }.width('100%')
+                  Divider().color(AppColors.DIVIDER)
+                  Text(order.items.map((item: OrderItem) => item.skuNameSnapshot).join(' / ')).fontSize(16).lineHeight(24)
+                    .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).fontColor(AppColors.BRAND).width('100%').textAlign(TextAlign.Start)
+                  Row() {
+                    Text('共 ' + OrderPresentation.quantity(order) + ' 件').fontSize(12).fontColor(AppColors.TEXT_SECONDARY)
+                    Blank()
+                    Text('¥ ' + order.totalAmount.toFixed(2)).fontSize(22).fontColor(AppColors.BRAND)
+                  }.width('100%')
+                  Row() { Blank(); Text('查看详情 ›').fontSize(13).fontColor(AppColors.BRAND) }.width('100%')
+                }.width('100%').padding(18)
+              }.width('100%').padding(0).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD)
+                .onClick(() => this.openDetail(order.id))
             }, (order: OrderDetail) => order.id.toString())
-          }.width('100%').padding({ top: 4, bottom: 22 })
-        }.width('100%').layoutWeight(1).scrollBar(BarState.Off)
+          }.width('100%').padding({ bottom: 24 })
+        }.layoutWeight(1).width('100%').align(Alignment.Top).scrollBar(BarState.Off)
       }
-      Blank().height(76)
-    }.width('100%').height('100%').padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
-      .bindSheet($$this.detailSheetVisible, this.detailSheet(), { height: SheetSize.LARGE, showClose: false, backgroundColor: AppColors.SURFACE })
+    }.width('100%').height('100%').padding({ left: 18, right: 18, top: 8 }).backgroundColor(AppColors.BACKGROUND)
+      .bindSheet($$this.detailSheetVisible, this.detailSheet(), { height: SheetSize.LARGE,
+        showClose: false, backgroundColor: AppColors.SURFACE,
+        shouldDismiss: (action: SheetDismiss) => { if (!this.actionBusy) { this.serial++; action.dismiss() } } })
   }
 }

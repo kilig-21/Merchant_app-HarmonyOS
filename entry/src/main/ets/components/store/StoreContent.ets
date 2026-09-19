@@ -16,6 +16,10 @@ export struct StoreContent {
   @State loadingProducts: boolean = false
   @State storeError: boolean = false
   @State productError: boolean = false
+  @State loadingMore: boolean = false
+  @State moreFailed: boolean = false
+  @State hasMore: boolean = false
+  private page: number = 1
   onOpenProduct: (storeId: number, productId: number) => void = () => {}
 
   private repository: BrowseRepository = new BrowseRepository()
@@ -58,10 +62,13 @@ export struct StoreContent {
     this.products = []
     this.loadingProducts = true
     this.productError = false
+    this.loadingMore = false
+    this.moreFailed = false
+    this.page = 1
     try {
       const products = await this.repository.getProducts(storeId)
       // 快速切店时，只接受最后一次选择的结果。
-      if (this.alive && serial === this.requestSerial) { this.products = products }
+      if (this.alive && serial === this.requestSerial) { this.products = products; this.hasMore = products.length === 20 }
     } catch (_) {
       if (this.alive && serial === this.requestSerial) { this.productError = true }
     } finally {
@@ -74,6 +81,26 @@ export struct StoreContent {
     this.activeStoreId = storeId
     this.onSelectStore(storeId)
     this.loadProducts(storeId)
+  }
+
+  private async loadMore(): Promise<void> {
+    if (this.loadingProducts || this.loadingMore || !this.hasMore) { return }
+    const serial = this.requestSerial
+    const next = this.page + 1
+    this.loadingMore = true
+    this.moreFailed = false
+    try {
+      const items = await this.repository.getProducts(this.activeStoreId, next)
+      if (!this.alive || serial !== this.requestSerial) { return }
+      this.products = this.products.concat(items.filter((item: ProductSummary) =>
+        !this.products.some((old: ProductSummary) => old.id === item.id)))
+      this.page = next
+      this.hasMore = items.length === 20
+    } catch (_) {
+      if (this.alive && serial === this.requestSerial) { this.moreFailed = true }
+    } finally {
+      if (this.alive && serial === this.requestSerial) { this.loadingMore = false }
+    }
   }
 
   private storeName(): string {
@@ -195,6 +222,11 @@ export struct StoreContent {
                   }.width('100%').alignItems(VerticalAlign.Top)
                 }
               }, (product: ProductSummary) => `${product.id}`)
+              if (this.hasMore) {
+                Button(this.loadingMore ? '正在加载…' : this.moreFailed ? '加载失败，点击重试' : '加载更多商品', { type: ButtonType.Normal })
+                  .width('100%').height(44).backgroundColor(BrowseTheme.WASH).fontColor(BrowseTheme.INK).borderRadius(12)
+                  .enabled(!this.loadingMore).onClick(() => this.loadMore())
+              }
               Row() {
                 Divider().layoutWeight(1).color(BrowseTheme.LINE)
                 Text(`${this.products.length} 件选物 · 商品图片为示意图`).fontSize(10)

@@ -9,9 +9,9 @@ import { MOCK_PRODUCT_SKUS, MockProductSkus } from '../mock/ProductMockData'
 export class BrowseRepository {
   private hasFailed: boolean = false
 
-  async searchProducts(keyword: string): Promise<DiscoveryProduct[]> {
+  async searchProducts(keyword: string, page: number = 1, size: number = 20): Promise<DiscoveryProduct[]> {
     if (BrowseConfig.source === BrowseSource.Remote) {
-      return await ProductApi.searchProducts(keyword)
+      return await ProductApi.searchProducts(keyword, undefined, page, size)
     }
     await this.waitForMock()
     if (BrowseConfig.scenario === BrowseScenario.EmptyStores) { return [] }
@@ -26,7 +26,7 @@ export class BrowseRepository {
         }
       })
     })
-    return result
+    return result.slice((page - 1) * size, page * size)
   }
 
   async getStore(storeId: number): Promise<StoreSummary> {
@@ -72,9 +72,9 @@ export class BrowseRepository {
     return MOCK_CATALOGS.map((catalog: MockStoreCatalog) => catalog.store)
   }
 
-  async getProducts(storeId: number): Promise<ProductSummary[]> {
+  async getProducts(storeId: number, page: number = 1, size: number = 20): Promise<ProductSummary[]> {
     if (BrowseConfig.source === BrowseSource.Remote) {
-      return await ProductApi.getProducts(storeId)
+      return await ProductApi.getProducts(storeId, page, size)
     }
     await this.waitForMock()
     if (BrowseConfig.scenario === BrowseScenario.FailProductsOnce && !this.hasFailed) {
@@ -83,6 +83,6 @@ export class BrowseRepository {
     }
     const catalog = MOCK_CATALOGS.find((item: MockStoreCatalog) => item.store.id === storeId)
     if (catalog === undefined) { throw new Error('店铺不存在') }
-    return catalog.products.slice()
+    return catalog.products.slice((page - 1) * size, page * size)
   }
 }

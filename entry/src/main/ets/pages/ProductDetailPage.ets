@@ -1,5 +1,6 @@
 import { ProductDetail, ProductSku } from '../model/ProductModels'
 import { BrowseRepository } from '../repository/BrowseRepository'
+import { BrowseConfig, BrowseSource } from '../config/BrowseConfig'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { BrowseTheme } from '../theme/BrowseTheme'
 import { ProductArtwork } from '../theme/ProductArtwork'
@@ -12,6 +13,8 @@ export struct ProductDetailPage {
   @Prop productId: number = 0
   @Prop initialSkuId: number = 0
   @ObjectLink cart: CartViewModel
+  @Prop signedIn: boolean = false
+  onLogin: () => void = () => {}
   onBack: () => void = () => {}
   onOpenStore: (storeId: number) => void = () => {}
   onOpenCart: () => void = () => {}
@@ -68,13 +71,20 @@ export struct ProductDetailPage {
     this.feedback = ''
   }
   private async addToCart(): Promise<void> {
+    if (!this.signedIn && BrowseConfig.source === BrowseSource.Remote) { this.onLogin(); return }
     const sku = this.selectedSku()
     if (sku === undefined || !this.canBuy()) { return }
     this.feedback = ''
     const added = await this.cart.add(sku.id, this.quantity)
     if (!this.alive) { return }
     this.success = added
+    if (!added && this.cart.authRequired) { this.onLogin() }
     this.feedback = added ? `已加入购物车 · ${sku.skuName} × ${this.quantity}` : this.cart.error
+    if (added) {
+      this.showSku = false
+      try { this.getUIContext().getPromptAction().showToast({ message: '已加入购物车', duration: 1800 }) }
+      catch (_) { /* 页面反馈仍然显示加购结果。 */ }
+    }
   }
 
   @Builder
@@ -115,9 +125,9 @@ export struct ProductDetailPage {
       .width('100%')
       .align(Alignment.TopStart)
       .scrollBar(BarState.Off)
-      Button('确认规格', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(8)
+      Button(this.cart.busy ? '正在加入…' : '选好了，加入购物车', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(8)
         .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER)
-        .enabled(this.stock() > 0).onClick(() => this.showSku = false)
+        .enabled(this.canBuy()).onClick(() => this.addToCart())
     }.width('100%').height('100%').padding({ left: 22, right: 22, bottom: 24 })
   }
 
@@ -209,7 +219,7 @@ export struct ProductDetailPage {
       }
     }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)
       .bindSheet($$this.showSku, this.skuPicker(), {
-        height: SheetSize.LARGE, showClose: true,
+        height: SheetSize.MEDIUM, showClose: true,
         title: { title: '选择规格与数量' }, backgroundColor: BrowseTheme.PAPER
       })
   }

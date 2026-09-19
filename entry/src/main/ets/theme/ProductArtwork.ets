@@ -4,6 +4,7 @@ export class ProductArtwork {
     if (productId === 2002) { return $r('app.media.browse_glass') }
     if (productId === 2003) { return $r('app.media.browse_scent') }
     if (productId === 2101 || productId === 2102) { return $r('app.media.browse_coffee') }
-    return $r('app.media.browse_tea')
+    if (productId === 2001) { return $r('app.media.browse_tea') }
+    return $r('app.media.product_placeholder')
   }
 }

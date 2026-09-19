@@ -2,7 +2,6 @@ import { CartViewModel } from '../../viewmodel/CartViewModel'
 import { CartGroup, CartItem } from '../../model/CartModels'
 import { BrowseTheme } from '../../theme/BrowseTheme'
 import { CartItemCard } from './CartItemCard'
-import { Money } from '../../utils/Money'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 
 @Component
@@ -12,7 +11,7 @@ export struct CartContent {
   onOpenProduct: (storeId: number, productId: number, skuId: number) => void = () => {}
   onOpenStore: (storeId: number) => void = () => {}
   onCheckout: () => void = () => {}
-  @State showReview: boolean = false
+  onLogin: () => void = () => {}
 
   aboutToAppear(): void { this.cart.load() }
 
@@ -31,49 +30,6 @@ export struct CartContent {
     return `已选 ${selected.length}/${available.length}`
   }
 
-  @Builder
-  reviewSheet() {
-    Column({ space: 18 }) {
-      Scroll() {
-        Column({ space: 18 }) {
-          ForEach(this.cart.groups(), (group: CartGroup) => {
-            if (group.items.some((item: CartItem) => this.cart.selectedIds.includes(item.id) && this.cart.selectable(item))) {
-              Column({ space: 14 }) {
-                Text(group.storeName).fontSize(17).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK).width('100%')
-                ForEach(group.items, (item: CartItem) => {
-                  if (this.cart.selectedIds.includes(item.id) && this.cart.selectable(item)) {
-                    Row({ space: 12 }) {
-                      Column({ space: 5 }) {
-                        Text(item.productName).fontSize(14).fontColor(BrowseTheme.INK)
-                        Text(`${item.skuName} × ${item.quantity}`).fontSize(12).fontColor(BrowseTheme.MUTED)
-                      }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-                      Text(`¥ ${Money.format(Money.cents(item.salePrice) * item.quantity)}`).fontSize(14).fontColor(BrowseTheme.INK)
-                    }.width('100%')
-                  }
-                }, (item: CartItem) => item.id.toString())
-                Divider().color(BrowseTheme.LINE)
-              }.width('100%')
-            }
-          }, (group: CartGroup) => group.storeId.toString())
-        }.width('100%')
-      }
-      .layoutWeight(1)
-      .width('100%')
-      .align(Alignment.TopStart)
-      .scrollBar(BarState.Off)
-      Row() {
-        Text(`已选 ${this.cart.selectedCount()} 件`).fontSize(14).fontColor(BrowseTheme.MUTED)
-        Blank()
-        Text(`¥ ${this.cart.selectedSubtotal()}`).fontSize(25).fontColor(BrowseTheme.INK)
-      }.width('100%')
-      Text('以上为商品预估金额，未含运费。提交后以服务端结算金额和状态为准。')
-        .fontSize(12).lineHeight(20).fontColor(BrowseTheme.MUTED).width('100%')
-      Button('填写地址并提交订单', { type: ButtonType.Normal }).width('100%').height(48)
-        .fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK).borderRadius(8)
-        .onClick(() => { this.showReview = false; this.onCheckout() })
-    }.width('100%').height('100%').padding({ left: 22, right: 22, bottom: 24 })
-  }
-
   build() {
     Column({ space: 0 }) {
       Scroll() {
@@ -89,7 +45,10 @@ export struct CartContent {
               .onClick(() => this.confirmRemove(this.cart.selectedIds.slice()))
           }.width('100%')
           Divider().color(BrowseTheme.INK)
-          if (this.cart.loading && this.cart.items.length === 0) {
+          if (this.cart.authRequired) {
+            PageStateView({ type: PageStateType.Empty, title: '请重新登录', description: '登录状态已失效，登录后继续整理购物车。',
+              actionLabel: '登录并继续', onAction: this.onLogin })
+          } else if (this.cart.loading && this.cart.items.length === 0) {
             PageStateView({ type: PageStateType.Loading, title: '正在整理购物车', description: '稍等片刻。' })
           } else if (this.cart.error.length > 0 && !this.cart.initialized) {
             PageStateView({ type: PageStateType.Error, title: '购物车暂时无法加载', description: this.cart.error, onAction: () => this.cart.load() })
@@ -147,7 +106,7 @@ export struct CartContent {
       .layoutWeight(1)
       .align(Alignment.TopStart)
       .scrollBar(BarState.Off)
-      if (this.cart.items.length > 0) {
+      if (this.cart.items.length > 0 && !this.cart.authRequired) {
         Column({ space: 8 }) {
           Row() {
             Checkbox({ name: 'cart-all' }).select(this.cart.allSelected()).shape(CheckBoxShape.CIRCLE)
@@ -159,17 +118,14 @@ export struct CartContent {
             Text('合计（预估）').fontSize(12).fontColor(BrowseTheme.MUTED).margin({ right: 6 })
             Text(`¥ ${this.cart.selectedSubtotal()}`).fontSize(23).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
           }.width('100%')
-          Button(`核对商品（${this.cart.selectedCount()} 件）`, { type: ButtonType.Normal }).width('100%').height(46)
+          Button(`去结算（${this.cart.selectedCount()} 件）`, { type: ButtonType.Normal }).width('100%').height(46)
             .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER).fontSize(15).borderRadius(8)
             .enabled(!this.cart.busy && this.cart.error.length === 0 && this.cart.selectedCount() > 0)
-            .onClick(() => this.showReview = true)
+            .onClick(this.onCheckout)
         }.width('100%').padding({ left: 14, right: 14, top: 10, bottom: 10 }).backgroundColor('#FFFEF9').borderRadius(BrowseTheme.RADIUS)
           .border({ width: 1, color: BrowseTheme.LINE })
       }
       Blank().height(82)
     }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)
-      .bindSheet($$this.showReview, this.reviewSheet(), {
-        height: SheetSize.LARGE, showClose: true, title: { title: '核对已选商品' }, backgroundColor: BrowseTheme.PAPER
-      })
   }
 }

@@ -7,14 +7,11 @@ export struct FloatingTabBar {
   onSelect: (index: number) => void = () => {}
 
   @Builder
-  tabItem(index: number, icon: string, title: string) {
+  tabItem(index: number, icon: Resource, title: string) {
     Column({ space: 2 }) {
       Stack({ alignContent: Alignment.TopEnd }) {
-      Text(icon)
-        .fontSize(index === this.selectedIndex ? 20 : 18)
-        .lineHeight(22)
-        .fontWeight(index === this.selectedIndex ? FontWeight.Medium : FontWeight.Regular)
-        .fontColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
+      Image(icon).width(22).height(22)
+        .fillColor(index === this.selectedIndex ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
         .scale({
           x: index === this.selectedIndex ? 1.08 : 1,
           y: index === this.selectedIndex ? 1.08 : 1
@@ -37,6 +34,9 @@ export struct FloatingTabBar {
     .layoutWeight(1)
     .height(50)
     .justifyContent(FlexAlign.Center)
+    .accessibilityText(title + (index === this.selectedIndex ? '，当前页面' : ''))
+    .focusable(true)
+    .stateStyles({ pressed: { opacity: 0.65 } })
     .onClick(() => {
       this.getUIContext().animateTo({ duration: 280, curve: Curve.EaseInOut }, () => {
         this.onSelect(index)
@@ -62,10 +62,10 @@ export struct FloatingTabBar {
       .animation({ duration: 280, curve: Curve.EaseInOut })
 
       Row() {
-        this.tabItem(0, '⌂', '首页')
-        this.tabItem(1, '▦', '逛店')
-        this.tabItem(2, '▱', '购物车')
-        this.tabItem(3, '○', '我的')
+        this.tabItem(0, $r('app.media.nav_home'), '首页')
+        this.tabItem(1, $r('app.media.nav_store'), '逛店')
+        this.tabItem(2, $r('app.media.nav_cart'), '购物车')
+        this.tabItem(3, $r('app.media.nav_profile'), '我的')
       }
       .width('100%')
       .height(50)

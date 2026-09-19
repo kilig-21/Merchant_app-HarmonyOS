@@ -42,6 +42,5 @@ export struct CartItemCard {
           disabled: this.busy || this.item.availableStock === 0, onChange: this.onQuantityChange })
       }.width('100%')
     }.width('100%').padding({ top: 16, bottom: 12 })
-      .stateStyles({ pressed: { opacity: 0.78 } })
   }
 }

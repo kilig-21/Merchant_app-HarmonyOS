@@ -6,6 +6,7 @@ import { PageStateType, PageStateView } from '../components/common/PageStateView
 @Component
 export struct AddressManagerPage {
   onBack: () => void = () => {}
+  onChanged: () => void = () => {}
   @State addresses: Address[] = []
   @State loading: boolean = true
   @State error: string = ''
@@ -19,6 +20,7 @@ export struct AddressManagerPage {
   @State detailAddress: string = ''
   @State isDefault: boolean = true
   @State saving: boolean = false
+  @State removingId: number = 0
   @State formError: string = ''
 
   aboutToAppear(): void { this.load() }
@@ -48,6 +50,7 @@ export struct AddressManagerPage {
     if (this.receiverName.trim().length === 0 || this.receiverName.length > 64) { this.formError = '请填写不超过 64 字的收货人姓名'; return false }
     if (this.receiverPhone.trim().length === 0 || this.receiverPhone.length > 32) { this.formError = '请填写不超过 32 字的联系电话'; return false }
     if (this.province.trim().length === 0 || this.city.trim().length === 0 || this.district.trim().length === 0) { this.formError = '请完整填写省、市、区'; return false }
+    if (this.province.length > 64 || this.city.length > 64 || this.district.length > 64) { this.formError = '省、市、区各不能超过 64 字'; return false }
     if (this.detailAddress.trim().length === 0 || this.detailAddress.length > 255) { this.formError = '请填写不超过 255 字的详细地址'; return false }
     return true
   }
@@ -61,11 +64,14 @@ export struct AddressManagerPage {
       if (this.editingId === 0) { await AddressApi.create(request) } else { await AddressApi.update(this.editingId, request) }
       this.editorVisible = false
       await this.load()
+      this.onChanged()
+      try { this.getUIContext().getPromptAction().showToast({ message: '地址已保存' }) } catch (_) {}
     } catch (error) { this.formError = error instanceof Error ? error.message : '地址保存失败，请重试' }
     finally { this.saving = false }
   }
 
   private confirmRemove(address: Address): void {
+    if (this.removingId !== 0 || this.saving) { return }
     this.getUIContext().showAlertDialog({
       title: '删除该地址？', message: `${address.receiverName} · ${address.receiverPhone}`,
       primaryButton: { value: '保留', action: () => {} },
@@ -74,19 +80,24 @@ export struct AddressManagerPage {
   }
 
   private async remove(id: number): Promise<void> {
-    try { await AddressApi.remove(id); await this.load() }
+    if (this.removingId !== 0) { return }
+    this.removingId = id
+    try { await AddressApi.remove(id); await this.load(); this.onChanged() }
     catch (error) { this.error = error instanceof Error ? error.message : '地址删除失败，请重试' }
+    finally { this.removingId = 0 }
   }
 
   @Builder
   editor() {
+    Scroll() {
     Column({ space: 12 }) {
       Row() {
         Text(this.editingId === 0 ? '新增收货地址' : '编辑收货地址').fontSize(18).fontWeight(FontWeight.Bold).fontColor(AppColors.TEXT_PRIMARY).layoutWeight(1)
-        Text('×').fontSize(24).fontColor(AppColors.TEXT_SECONDARY).padding(5).onClick(() => this.editorVisible = false)
+        Button('×', { type: ButtonType.Normal }).width(44).height(44).fontSize(24).backgroundColor(Color.Transparent)
+          .fontColor(AppColors.TEXT_SECONDARY).enabled(!this.saving).onClick(() => this.editorVisible = false).accessibilityText('关闭地址编辑')
       }.width('100%')
       TextInput({ text: this.receiverName, placeholder: '收货人姓名' }).width('100%').height(44).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.receiverName = value)
-      TextInput({ text: this.receiverPhone, placeholder: '联系电话' }).width('100%').height(44).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.receiverPhone = value)
+      TextInput({ text: this.receiverPhone, placeholder: '联系电话' }).type(InputType.PhoneNumber).maxLength(32).width('100%').height(48).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.receiverPhone = value)
       TextInput({ text: this.province, placeholder: '省' }).width('100%').height(44).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.province = value)
       TextInput({ text: this.city, placeholder: '市' }).width('100%').height(44).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.city = value)
       TextInput({ text: this.district, placeholder: '区' }).width('100%').height(44).backgroundColor(AppColors.BACKGROUND).borderRadius(12).onChange((value: string) => this.district = value)
@@ -97,7 +108,8 @@ export struct AddressManagerPage {
       }.width('100%')
       if (this.formError.length > 0) { Text(this.formError).width('100%').fontSize(12).fontColor(AppColors.DANGER) }
       Button(this.saving ? '正在保存…' : '保存地址').width('100%').height(46).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).enabled(!this.saving).onClick(() => this.save())
-    }.width('100%').padding(AppSpacing.CARD)
+    }.width('100%').padding(AppSpacing.CARD).enabled(!this.saving)
+    }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off)
   }
 
   build() {
@@ -125,14 +137,20 @@ export struct AddressManagerPage {
                   if (address.isDefault) { Text('默认').fontSize(10).fontColor(AppColors.BRAND).padding({ left: 7, right: 7, top: 3, bottom: 3 }).backgroundColor(AppColors.BRAND_SOFT).borderRadius(8) }
                 }.width('100%')
                 Text(`${address.province}${address.city}${address.district}${address.detailAddress}`).width('100%').fontSize(13).lineHeight(20).fontColor(AppColors.TEXT_SECONDARY)
-                Row() { Blank(); Text('编辑').fontSize(12).fontColor(AppColors.BRAND).padding(6).onClick(() => this.openEditor(address)); Text('删除').fontSize(12).fontColor(AppColors.DANGER).padding(6).onClick(() => this.confirmRemove(address)) }.width('100%')
+                Row({ space: 10 }) {
+                  Blank()
+                  Button('编辑', { type: ButtonType.Normal }).height(44).fontSize(13).backgroundColor(AppColors.BRAND_SOFT)
+                    .fontColor(AppColors.BRAND).borderRadius(10).enabled(this.removingId === 0).onClick(() => this.openEditor(address))
+                  Button(this.removingId === address.id ? '删除中…' : '删除', { type: ButtonType.Normal }).height(44).fontSize(13)
+                    .backgroundColor(Color.Transparent).fontColor(AppColors.DANGER).enabled(this.removingId === 0).onClick(() => this.confirmRemove(address))
+                }.width('100%')
               }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })
             }, (address: Address) => address.id.toString())
           }.width('100%').padding({ top: 4, bottom: 22 })
-        }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
+        }.layoutWeight(1).width('100%').align(Alignment.Top).scrollBar(BarState.Off)
       }
-      Blank().height(76)
     }.width('100%').height('100%').padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
-      .bindSheet($$this.editorVisible, this.editor(), { height: SheetSize.LARGE, showClose: false, backgroundColor: AppColors.SURFACE })
+      .bindSheet($$this.editorVisible, this.editor(), { height: SheetSize.LARGE, showClose: false, backgroundColor: AppColors.SURFACE,
+        shouldDismiss: (action: SheetDismiss) => { if (!this.saving) { action.dismiss() } } })
   }
 }

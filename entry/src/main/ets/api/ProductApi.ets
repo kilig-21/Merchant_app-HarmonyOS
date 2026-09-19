@@ -3,8 +3,8 @@ import { ProductSummary } from '../model/StoreModels'
 import { HttpClient, QueryParam, RequestOptions } from '../network/HttpClient'
 
 export class ProductApi {
-  static async searchProducts(keyword: string, storeId?: number): Promise<DiscoveryProduct[]> {
-    const query: QueryParam[] = [new QueryParam('keyword', keyword), new QueryParam('page', 1), new QueryParam('size', 20)]
+  static async searchProducts(keyword: string, storeId?: number, page: number = 1, size: number = 20): Promise<DiscoveryProduct[]> {
+    const query: QueryParam[] = [new QueryParam('keyword', keyword), new QueryParam('page', page), new QueryParam('size', size)]
     if (storeId !== undefined) {
       query.push(new QueryParam('storeId', storeId))
     }
@@ -12,8 +12,8 @@ export class ProductApi {
       new RequestOptions(undefined, undefined, query))
   }
 
-  static async getProducts(storeId: number): Promise<ProductSummary[]> {
-    const query: QueryParam[] = [new QueryParam('page', 1), new QueryParam('size', 20)]
+  static async getProducts(storeId: number, page: number = 1, size: number = 20): Promise<ProductSummary[]> {
+    const query: QueryParam[] = [new QueryParam('page', page), new QueryParam('size', size)]
     return await HttpClient.request<ProductSummary[]>(`/api/public/stores/${storeId}/products`,
       new RequestOptions(undefined, undefined, query))
   }

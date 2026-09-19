@@ -12,7 +12,7 @@ export struct PageStateView {
   @Prop type: PageStateType = PageStateType.Loading
   @Prop title: string = ''
   @Prop description: string = ''
-  @Prop actionLabel: string = '重试'
+  @Prop actionLabel: string = ''
   onAction: () => void = () => {}
 
   build() {
@@ -47,9 +47,9 @@ export struct PageStateView {
         .lineHeight(19)
         .textAlign(TextAlign.Center)
 
-      if (this.type === PageStateType.Error) {
-        Button(this.actionLabel)
-          .height(36)
+      if (this.type === PageStateType.Error || (this.type === PageStateType.Empty && this.actionLabel.length > 0)) {
+        Button(this.actionLabel || '重试')
+          .height(44)
           .fontSize(13)
           .fontColor(AppColors.SURFACE)
           .backgroundColor(AppColors.BRAND)

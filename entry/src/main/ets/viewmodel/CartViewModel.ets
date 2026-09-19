@@ -1,6 +1,7 @@
 import { CartGroup, CartItem } from '../model/CartModels'
 import { CartRepository } from '../repository/CartRepository'
 import { Money } from '../utils/Money'
+import { ApiError } from '../network/ApiError'
 
 @Observed
 export class CartViewModel {
@@ -11,6 +12,7 @@ export class CartViewModel {
   initialized: boolean = false
   selectedIds: number[] = []
   message: string = ''
+  authRequired: boolean = false
   private repository: CartRepository
 
   constructor(repository: CartRepository = new CartRepository()) { this.repository = repository }
@@ -20,12 +22,14 @@ export class CartViewModel {
     this.busy = true
     this.loading = true
     this.error = ''
+    this.authRequired = false
     this.message = ''
     try {
       this.items = await this.repository.list()
       this.reconcileSelection()
       this.initialized = true
     } catch (error) {
+      this.authRequired = error instanceof ApiError && error.statusCode === 401
       this.error = (error as Error).message || '购物车加载失败，请重试'
     } finally {
       this.loading = false
@@ -48,6 +52,7 @@ export class CartViewModel {
       this.initialized = true
       return true
     } catch (error) {
+      this.authRequired = error instanceof ApiError && error.statusCode === 401
       this.error = (error as Error).message || '加入失败，请重试'
       return false
     } finally { this.busy = false }
@@ -131,6 +136,7 @@ export class CartViewModel {
       this.items = await this.repository.update(itemId, quantity)
       this.reconcileSelection()
     } catch (error) {
+      this.authRequired = error instanceof ApiError && error.statusCode === 401
       this.error = (error as Error).message || '修改失败，请重试'
     } finally { this.busy = false }
   }
@@ -145,7 +151,10 @@ export class CartViewModel {
       this.reconcileSelection()
       this.message = '已从购物车移除'
     } catch (error) {
+      this.authRequired = error instanceof ApiError && error.statusCode === 401
       this.error = (error as Error).message || '移除失败，请重试'
+      // 批量删除可能部分成功，失败后仍以重新读取的数据为准。
+      try { this.items = await this.repository.list(); this.reconcileSelection() } catch (_) {}
     } finally { this.busy = false }
   }
 }
