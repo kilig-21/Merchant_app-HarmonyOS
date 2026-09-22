@@ -24,6 +24,16 @@ export struct OrdersPage {
   private serial: number = 0
   private alive: boolean = false
 
+  private shippingRecipient(order: OrderDetail): string {
+    if (order.shippingAddress === null) { return '该历史订单未保存收货地址' }
+    return order.shippingAddress.receiverName + '  ' + order.shippingAddress.receiverPhone
+  }
+
+  private shippingAddressLine(order: OrderDetail): string {
+    if (order.shippingAddress === null) { return '请联系商家确认收货信息。' }
+    return order.shippingAddress.province + order.shippingAddress.city + order.shippingAddress.district + order.shippingAddress.detailAddress
+  }
+
   aboutToAppear(): void { this.alive = true; this.filter = this.initialFilter; this.load() }
   aboutToDisappear(): void { this.alive = false; this.serial++ }
   private async load(): Promise<void> {
@@ -114,9 +124,9 @@ export struct OrdersPage {
             Divider().color(AppColors.DIVIDER)
             Column({ space: 8 }) {
               Text('收货信息').fontSize(17).fontColor(AppColors.BRAND)
-              Text(this.detail.shippingAddress.receiverName + '  ' + this.detail.shippingAddress.receiverPhone)
+              Text(this.shippingRecipient(this.detail))
                 .fontSize(14).fontColor(AppColors.BRAND)
-              Text(this.detail.shippingAddress.province + this.detail.shippingAddress.city + this.detail.shippingAddress.district + this.detail.shippingAddress.detailAddress)
+              Text(this.shippingAddressLine(this.detail))
                 .fontSize(13).lineHeight(22).fontColor(AppColors.TEXT_SECONDARY)
             }.width('100%').alignItems(HorizontalAlign.Start)
             Divider().color(AppColors.DIVIDER)

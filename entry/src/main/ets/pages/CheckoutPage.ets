@@ -3,7 +3,7 @@ import { CheckoutApi } from '../api/CheckoutApi'
 import { CheckoutIntent } from '../viewmodel/CheckoutIntent'
 import { ApiError } from '../network/ApiError'
 import { CartItem } from '../model/CartModels'
-import { Address, CheckoutGroup } from '../model/CheckoutModels'
+import { Address, CheckoutCreateResult } from '../model/CheckoutModels'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { Money } from '../utils/Money'
 import { ProductArtwork } from '../theme/ProductArtwork'
@@ -24,7 +24,7 @@ export struct CheckoutPage {
   @State loading: boolean = true
   @State error: string = ''
   @State submitting: boolean = false
-  @State result: CheckoutGroup | null = null
+  @State result: CheckoutCreateResult | null = null
   @State uncertain: boolean = false
   private intent: CheckoutIntent = new CheckoutIntent()
 

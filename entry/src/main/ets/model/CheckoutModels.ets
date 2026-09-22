@@ -1,3 +1,5 @@
+import { OrderDetail } from './OrderModels'
+
 export interface Address {
   id: number
   receiverName: string
@@ -41,7 +43,8 @@ export class CheckoutRequest {
   }
 }
 
-export interface CheckoutOrderSummary {
+/** POST /api/checkouts 的创建结果中，每个子订单的字段。 */
+export interface CheckoutCreatedOrder {
   orderId: number
   orderNo: string
   status: string
@@ -49,11 +52,21 @@ export interface CheckoutOrderSummary {
   expireAt: string | null
 }
 
-export interface CheckoutGroup {
+/** POST /api/checkouts 的响应。 */
+export interface CheckoutCreateResult {
   checkoutGroupId: number
   checkoutNo: string
   status: string
   totalAmount: number
-  createdAt?: string
-  orders: CheckoutOrderSummary[]
+  orders: CheckoutCreatedOrder[]
+}
+
+/** GET /api/checkouts/{id} 的响应；子订单与 GET /api/orders/{id} 结构一致。 */
+export interface CheckoutGroupDetail {
+  checkoutGroupId: number
+  checkoutNo: string
+  status: string
+  totalAmount: number
+  createdAt: string
+  orders: OrderDetail[]
 }

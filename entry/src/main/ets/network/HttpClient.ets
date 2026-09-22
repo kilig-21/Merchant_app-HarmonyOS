@@ -79,7 +79,16 @@ export class HttpClient {
       )
 
       const statusCode = Number(response.responseCode)
-      const envelope = HttpClient.parseEnvelope<T>(response.result)
+      let envelope: ApiResponse<T>
+      try {
+        envelope = HttpClient.parseEnvelope<T>(response.result)
+      } catch (error) {
+        // 反向代理或服务未启动时可能返回 HTML/空响应；保留 HTTP 状态便于页面判断是否可安全重试。
+        if (statusCode < 200 || statusCode >= 300) {
+          throw new ApiError(ApiErrorKind.Http, `服务响应异常：${statusCode}`, statusCode)
+        }
+        throw error
+      }
 
       if (statusCode < 200 || statusCode >= 300) {
         throw new ApiError(

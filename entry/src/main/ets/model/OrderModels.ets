@@ -25,5 +25,6 @@ export interface OrderDetail {
   expireAt: string | null
   createdAt: string
   items: OrderItem[]
-  shippingAddress: ShippingAddressSnapshot
+  // 兼容历史订单：后端早期数据可能还没有地址快照。
+  shippingAddress: ShippingAddressSnapshot | null
 }
