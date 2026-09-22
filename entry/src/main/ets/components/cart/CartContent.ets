@@ -1,6 +1,7 @@
 import { CartViewModel } from '../../viewmodel/CartViewModel'
 import { CartGroup, CartItem } from '../../model/CartModels'
 import { BrowseTheme } from '../../theme/BrowseTheme'
+import { AppColors, AppRadius } from '../../theme/AppTheme'
 import { CartItemCard } from './CartItemCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 
@@ -36,7 +37,7 @@ export struct CartContent {
         Column({ space: 20 }) {
           Row() {
             Column({ space: 6 }) {
-              Text('购物车').fontSize(28).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+              Text('购物车').fontSize(26).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
               Text(`${this.cart.count()} 件商品 · 慢慢选，认真买`).fontSize(12).fontColor(BrowseTheme.MUTED)
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
             Button('移除已选', { type: ButtonType.Normal }).fontSize(12).height(44).padding({ left: 12, right: 0 })
@@ -44,7 +45,7 @@ export struct CartContent {
               .enabled(!this.cart.busy && this.cart.selectedItems().length > 0)
               .onClick(() => this.confirmRemove(this.cart.selectedIds.slice()))
           }.width('100%')
-          Divider().color(BrowseTheme.INK)
+          Divider().color(BrowseTheme.LINE)
           if (this.cart.authRequired) {
             PageStateView({ type: PageStateType.Empty, title: '请重新登录', description: '登录状态已失效，登录后继续整理购物车。',
               actionLabel: '登录并继续', onAction: this.onLogin })
@@ -62,11 +63,13 @@ export struct CartContent {
             }
             if (this.cart.items.length === 0) {
               Column({ space: 18 }) {
-                Text('把喜欢的，\n留在这里。').fontSize(30).lineHeight(43).fontColor(BrowseTheme.INK)
-                Text('购物车还是空的。\n去选一件喜欢的商品吧。').fontSize(14).lineHeight(24).fontColor(BrowseTheme.MUTED)
+                Image($r('app.media.nav_cart')).width(72).height(72).padding(22)
+                  .backgroundColor(BrowseTheme.WASH).borderRadius(24)
+                Text('把喜欢的，留在这里').fontSize(23).lineHeight(33).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                Text('购物车还是空的，去发现一件日常好物。').fontSize(13).lineHeight(22).fontColor(BrowseTheme.MUTED).textAlign(TextAlign.Center)
                 Button('去逛逛 →', { type: ButtonType.Normal }).height(46).fontColor(BrowseTheme.PAPER)
-                  .backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onNavigate(1))
-              }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 36, bottom: 36 })
+                  .padding({ left: 28, right: 28 }).backgroundColor(BrowseTheme.INK).borderRadius(AppRadius.CONTROL).onClick(() => this.onNavigate(1))
+              }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 40, bottom: 40 })
             } else {
               ForEach(this.cart.groups(), (group: CartGroup) => {
                 Column() {
@@ -116,10 +119,10 @@ export struct CartContent {
             Text('全选').fontSize(13).fontColor(BrowseTheme.INK)
             Blank()
             Text('合计（预估）').fontSize(12).fontColor(BrowseTheme.MUTED).margin({ right: 6 })
-            Text(`¥ ${this.cart.selectedSubtotal()}`).fontSize(23).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+            Text(`¥ ${this.cart.selectedSubtotal()}`).fontSize(23).fontWeight(FontWeight.Medium).fontColor(AppColors.ACCENT)
           }.width('100%')
           Button(`去结算（${this.cart.selectedCount()} 件）`, { type: ButtonType.Normal }).width('100%').height(46)
-            .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER).fontSize(15).borderRadius(8)
+            .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER).fontSize(15).borderRadius(AppRadius.CONTROL)
             .enabled(!this.cart.busy && this.cart.error.length === 0 && this.cart.selectedCount() > 0)
             .onClick(this.onCheckout)
         }.width('100%').padding({ left: 14, right: 14, top: 10, bottom: 10 }).backgroundColor('#FFFEF9').borderRadius(BrowseTheme.RADIUS)

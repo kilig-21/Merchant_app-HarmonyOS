@@ -94,32 +94,32 @@ struct Index {
           onBack: () => this.pageStack.pop(), onOpenStore: (id: number) => this.openStore(id),
           onOpenCart: () => { this.selectedTabIndex = 2; this.pageStack.clear() }
         })
-      }.hideTitleBar(true)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'addresses') {
       NavDestination() {
         AddressManagerPage({ onBack: () => this.pageStack.pop(), onChanged: () => this.addressRevision++ })
-      }.hideTitleBar(true)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'checkout') {
       NavDestination() {
         CheckoutPage({ cart: this.cart, addressRevision: this.addressRevision,
           onLockChange: (locked: boolean) => this.checkoutLocked = locked,
           onBack: () => this.pageStack.pop(), onOpenAddresses: () => this.openPage('addresses'),
           onOpenOrders: () => { this.pageStack.pop(); this.openPage('orders') } })
-      }.hideTitleBar(true).onBackPressed(() => this.checkoutLocked)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND).onBackPressed(() => this.checkoutLocked)
     } else if (name === 'orders') {
       NavDestination() {
         OrdersPage({ initialFilter: (param as PageRoute).status, onBack: () => this.pageStack.pop(),
           onBrowse: () => { this.pageStack.clear(); this.selectedTabIndex = 1 } })
-      }.hideTitleBar(true)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'login') {
       NavDestination() {
         AuthPage({ session: this.session, onBack: () => this.pageStack.pop(), onSuccess: () => this.signedIn() })
-      }.hideTitleBar(true).onBackPressed(() => this.session.busy)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND).onBackPressed(() => this.session.busy)
     } else if (name === 'help' || name === 'settings') {
       NavDestination() {
         ServicePage({ settings: name === 'settings', session: this.session,
           onBack: () => this.pageStack.pop(), onLogin: () => this.login(), onLogout: () => this.signOut() })
-      }.hideTitleBar(true)
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     }
   }
 
@@ -153,6 +153,8 @@ struct Index {
                 onOpenProduct: (storeId: number, productId: number, skuId: number) => this.openProduct(storeId, productId, skuId),
                 onCheckout: () => this.openPage('checkout') })
             }
+          } else if (!this.session.ready) {
+            PageStateView({ type: PageStateType.Loading, title: '正在恢复账户', description: '稍等片刻。' })
           } else {
             ProfileContent({ session: this.session, onLogin: () => this.login(),
               onOpenOrders: (status: string) => this.openPage('orders', status),

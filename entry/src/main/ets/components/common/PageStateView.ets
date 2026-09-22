@@ -41,11 +41,13 @@ export struct PageStateView {
         .fontColor(AppColors.TEXT_PRIMARY)
         .textAlign(TextAlign.Center)
 
-      Text(this.description)
-        .fontSize(12)
-        .fontColor(AppColors.TEXT_SECONDARY)
-        .lineHeight(19)
-        .textAlign(TextAlign.Center)
+      if (this.description.length > 0) {
+        Text(this.description)
+          .fontSize(12)
+          .fontColor(AppColors.TEXT_SECONDARY)
+          .lineHeight(19)
+          .textAlign(TextAlign.Center)
+      }
 
       if (this.type === PageStateType.Error || (this.type === PageStateType.Empty && this.actionLabel.length > 0)) {
         Button(this.actionLabel || '重试')
@@ -54,6 +56,7 @@ export struct PageStateView {
           .fontColor(AppColors.SURFACE)
           .backgroundColor(AppColors.BRAND)
           .borderRadius(AppRadius.CONTROL)
+          .accessibilityText(this.actionLabel || '重试')
           .margin({ top: 4 })
           .onClick(() => this.onAction())
       }

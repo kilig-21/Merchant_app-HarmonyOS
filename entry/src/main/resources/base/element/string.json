@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "拾光集消费者商城"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "发现店铺与日常好物"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "拾光集"
     }
   ]
 }

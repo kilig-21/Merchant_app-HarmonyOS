@@ -164,7 +164,7 @@ export class HttpClient {
       throw new ApiError(ApiErrorKind.InvalidResponse, '服务响应格式无法识别')
     }
 
-    if (typeof envelope.code !== 'number' || typeof envelope.message !== 'string') {
+    if (envelope === null || typeof envelope !== 'object' || typeof envelope.code !== 'number' || typeof envelope.message !== 'string') {
       throw new ApiError(ApiErrorKind.InvalidResponse, '服务响应缺少标准字段')
     }
 

@@ -14,20 +14,30 @@ export class SessionViewModel {
   error: string = ''
 
   async restore(context: common.Context): Promise<void> {
-    const saved = await SessionRepository.load(context)
-    if (saved !== null) {
-      this.username = saved.user.username
-      HttpClient.setAccessToken(saved.accessToken)
-      try {
-        const user = await AuthApi.getCurrentUser()
-        if (user.userType !== 'CONSUMER') { await this.signOut(context) }
-        else { this.username = user.username }
-      } catch (error) {
-        // 断网保留会话，只有明确失效才要求重新登录。
-        if (error instanceof ApiError && error.statusCode === 401) { await this.signOut(context) }
+    this.ready = false
+    this.error = ''
+    try {
+      const saved = await SessionRepository.load(context)
+      if (saved !== null) {
+        this.username = saved.user.username
+        HttpClient.setAccessToken(saved.accessToken)
+        try {
+          const user = await AuthApi.getCurrentUser()
+          if (user.userType !== 'CONSUMER') { await this.signOut(context) }
+          else { this.username = user.username }
+        } catch (error) {
+          // 断网保留会话，只有明确失效才要求重新登录。
+          if (error instanceof ApiError && error.statusCode === 401) { await this.signOut(context) }
+        }
       }
+    } catch (_) {
+      // 恢复失败不能让首页永久停在加载态；用户仍可主动登录。
+      HttpClient.clearAccessToken()
+      this.username = ''
+      this.error = '账户状态暂时无法恢复，请重新登录'
+    } finally {
+      this.ready = true
     }
-    this.ready = true
   }
 
   async signIn(context: common.Context, account: string, password: string, register: boolean): Promise<boolean> {

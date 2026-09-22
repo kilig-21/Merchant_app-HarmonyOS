@@ -1,5 +1,6 @@
 import { AppColors, AppRadius } from '../theme/AppTheme'
 import { SessionViewModel } from '../viewmodel/SessionViewModel'
+import { PageHeader } from '../components/common/PageHeader'
 
 @Component
 export struct ServicePage {
@@ -31,11 +32,7 @@ export struct ServicePage {
 
   build() {
     Column() {
-      Row() {
-        Button('‹', { type: ButtonType.Normal }).width(44).height(44).fontSize(30).fontColor(AppColors.BRAND)
-          .backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
-        Text(this.settings ? '账户与设置' : '购物帮助').fontSize(19).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND)
-      }.width('100%')
+      PageHeader({ title: this.settings ? '账户与设置' : '购物帮助', inset: 16, onBack: this.onBack })
       Scroll() {
         Column({ space: 22 }) {
           if (this.settings) {

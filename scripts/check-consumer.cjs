@@ -44,6 +44,13 @@ async function run() {
   assert.equal(offline.username, 'consumerA', '离线启动不能自动退出');
   assert.equal(cleared, 0);
   assert.equal(offline.ready, true);
+  SessionRepository.load = async () => { throw new Error('preferences unavailable'); };
+  const unavailable = new SessionViewModel();
+  await unavailable.restore({});
+  assert.equal(unavailable.ready, true, '本地会话读取异常不能让应用永久停留在加载态');
+  assert.equal(unavailable.username, '');
+  assert.ok(unavailable.error.length > 0);
+  SessionRepository.load = async () => ({ accessToken: 'test-only', user });
   AuthApi.getCurrentUser = async () => { throw new ApiError(ApiErrorKind.Http, 'expired', 401); };
   const expired = new SessionViewModel();
   await expired.restore({});
@@ -112,6 +119,6 @@ async function run() {
   assert.deepEqual(partial.items.map(x => x.id), [2], '部分删除失败后必须同步已删除项');
   assert.deepEqual(partial.selectedIds, [2]);
   assert.ok(partial.error.length > 0);
-  console.log('PASS: 离线会话保留、401 失效、登录连点、退出清理、原请求重试、订单筛选/数量、商品分页、批量删除部分失败恢复。');
+  console.log('PASS: 离线会话保留、恢复异常兜底、401 失效、登录连点、退出清理、原请求重试、订单筛选/数量、商品分页、批量删除部分失败恢复。');
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });

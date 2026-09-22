@@ -1,6 +1,7 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { AppColors } from '../theme/AppTheme';
 
 const DOMAIN = 0x0000;
 
@@ -23,13 +24,21 @@ export default class EntryAbility extends UIAbility {
         return;
       }
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
+      try {
+        // 当前品牌采用浅色纸感主题，原生控件与系统栏保持同一套明暗关系。
+        this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
+        windowStage.getMainWindowSync().setWindowSystemBarProperties({
+          statusBarColor: AppColors.BACKGROUND,
+          statusBarContentColor: AppColors.BRAND,
+          navigationBarColor: AppColors.BACKGROUND,
+          navigationBarContentColor: AppColors.BRAND
+        }).catch(() => {
+          hilog.warn(DOMAIN, 'testTag', 'System bar appearance could not be applied');
+        });
+      } catch (_) {
+        hilog.warn(DOMAIN, 'testTag', 'Window appearance could not be applied');
+      }
     });
-
-    try {
-      this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
-    } catch (err) {
-      hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
-    }
   }
 
   onWindowStageDestroy(): void {

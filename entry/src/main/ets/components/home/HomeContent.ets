@@ -4,6 +4,7 @@ import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 import { BrowseTheme } from '../../theme/BrowseTheme'
 import { ProductArtwork } from '../../theme/ProductArtwork'
+import { AppColors, AppRadius } from '../../theme/AppTheme'
 
 @Component
 export struct HomeContent {
@@ -84,61 +85,73 @@ export struct HomeContent {
 
   @Builder
   productCell(product: DiscoveryProduct, index: number) {
-    Column({ space: 7 }) {
+    Column({ space: 0 }) {
       BrowseProductCard({ product: product, artwork: ProductArtwork.resolve(product.id),
         sequence: `${index + 1}`.padStart(2, '0'),
         onOpen: (productId: number) => this.onOpenProduct(product.storeId, productId) })
-      Text(product.storeName).fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
+      Row({ space: 5 }) {
+        Image($r('app.media.nav_store')).width(12).height(12).opacity(0.65)
+        Text(product.storeName).fontSize(11).fontColor(BrowseTheme.MUTED).layoutWeight(1)
+          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+      }.width('100%').padding({ left: 12, right: 12, top: 4, bottom: 12 })
     }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+      .backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).clip(true)
   }
 
   build() {
     Scroll() {
-      Column({ space: 18 }) {
-        Row() {
-          Text('拾光集 / 日常好物').fontSize(12).letterSpacing(1).fontColor(BrowseTheme.OLIVE)
+      Column({ space: 14 }) {
+        Row({ space: 9 }) {
+          Text('拾').fontSize(15).fontWeight(FontWeight.Medium).fontColor(AppColors.SURFACE)
+            .width(30).height(30).textAlign(TextAlign.Center).backgroundColor(BrowseTheme.INK).borderRadius(10)
+          Text('拾光集').fontSize(17).fontWeight(FontWeight.Medium).letterSpacing(2).fontColor(BrowseTheme.INK)
           Blank()
-          Text('今日选物').fontSize(10).fontColor(BrowseTheme.MUTED)
+          Text('日常好物，慢慢选').fontSize(11).fontColor(BrowseTheme.MUTED)
         }.width('100%')
-        Row({ space: 12 }) {
-          Text('发现日常好物').fontSize(28).lineHeight(38).fontWeight(FontWeight.Medium)
-          .fontColor(BrowseTheme.INK).layoutWeight(1)
-        }.width('100%').alignItems(VerticalAlign.Top)
         Search({ value: this.keyword, placeholder: '搜索商品或店铺' }).height(48)
           .textFont({ size: 14 }).placeholderFont({ size: 14 }).placeholderColor(BrowseTheme.MUTED)
-          .backgroundColor(BrowseTheme.WASH).borderRadius(8)
+          .backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CONTROL)
+          .border({ width: 1, color: BrowseTheme.LINE })
           .onChange((value: string) => this.onKeyword(value)).onSubmit(() => this.search())
         if (this.keyword.trim().length === 0) {
           Button({ type: ButtonType.Normal }) {
-            Row({ space: 18 }) {
+            Row({ space: 4 }) {
               Column({ space: 8 }) {
-                Text('从一家好店开始').fontSize(21).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.PAPER)
-                Text('看见商品，也发现值得常来的店铺。').fontSize(12).lineHeight(20).fontColor('#D2D5C9')
-                Text('打开店铺目录  ↗').fontSize(13).fontColor(BrowseTheme.PAPER).margin({ top: 6 })
+                Text('把喜欢，带进日常').fontSize(22).lineHeight(30).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                  .lineBreakStrategy(LineBreakStrategy.BALANCED)
+                Text('发现好店与日常好物').fontSize(12).lineHeight(20).fontColor(BrowseTheme.MUTED)
+                Text('去逛店  →').fontSize(13).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                  .padding({ left: 12, right: 12, top: 7, bottom: 7 }).backgroundColor(AppColors.SURFACE).borderRadius(16)
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-              Text('逛\n店').fontSize(22).lineHeight(32).fontColor('#D2D5C9')
-            }.width('100%').padding(18)
-          }.width('100%').padding(0).backgroundColor(BrowseTheme.INK).borderRadius(BrowseTheme.RADIUS)
-            .shadow({ radius: 18, color: '#2E24352C', offsetX: 0, offsetY: 7 }).onClick(() => this.onNavigate(1))
-          Row({ space: 12 }) {
+              Image($r('app.media.scene_daily')).width('28%').aspectRatio(0.89).objectFit(ImageFit.Contain)
+                .accessibilityLevel('no')
+            }.width('100%').padding(16).alignItems(VerticalAlign.Center)
+          }.width('100%').padding(0).backgroundColor(AppColors.SAND).borderRadius(BrowseTheme.RADIUS)
+            .onClick(() => this.onNavigate(1)).accessibilityText('从一家好店开始，打开店铺目录')
+          Row({ space: 8 }) {
             Button({ type: ButtonType.Normal }) {
-              Row() {
-                Column({ space: 5 }) {
-                  Text('购物车').fontSize(16).fontColor(BrowseTheme.INK)
-                  Text(this.cartCount > 0 ? `${this.cartCount} 件好物待整理` : '把喜欢的，留在这里').fontSize(11).fontColor(BrowseTheme.MUTED)
-                }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-                Text('↗').fontSize(20).fontColor(BrowseTheme.OLIVE)
-              }.padding(16).width('100%')
-            }.layoutWeight(1).padding(0).backgroundColor(BrowseTheme.WASH).borderRadius(BrowseTheme.RADIUS).onClick(() => this.onNavigate(2))
-            Button('我的 ›', { type: ButtonType.Normal }).width(88).height(72).padding(8).fontSize(14)
-              .fontColor(BrowseTheme.INK).backgroundColor('#EFEBDF').borderRadius(BrowseTheme.RADIUS).onClick(() => this.onNavigate(3))
-          }.width('100%')
+              Row({ space: 8 }) {
+                Image($r('app.media.nav_cart')).width(19).height(19)
+                Text(this.cartCount > 0 ? `购物车 · ${this.cartCount} 件` : '我的购物车').fontSize(12).fontColor(BrowseTheme.INK)
+                  .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+                Text('›').fontSize(18).fontColor(BrowseTheme.MUTED)
+              }.width('100%').padding({ left: 12, right: 12 })
+            }.layoutWeight(1).height(44).padding(0).backgroundColor(Color.Transparent).borderRadius(12).onClick(() => this.onNavigate(2))
+            Divider().vertical(true).height(18).color(BrowseTheme.LINE)
+            Button({ type: ButtonType.Normal }) {
+              Row({ space: 8 }) {
+                Image($r('app.media.nav_profile')).width(19).height(19)
+                Text('我的拾光').fontSize(12).fontColor(BrowseTheme.INK).layoutWeight(1)
+                Text('›').fontSize(18).fontColor(BrowseTheme.MUTED)
+              }.width('100%').padding({ left: 12, right: 12 })
+            }.layoutWeight(1).height(44).padding(0).backgroundColor(Color.Transparent).borderRadius(12).onClick(() => this.onNavigate(3))
+          }.width('100%').margin({ top: -6, bottom: -4 })
         }
         Row() {
-          Text(this.keyword.trim().length > 0 ? '搜索结果' : '慢慢挑选').fontSize(22).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+          Text(this.keyword.trim().length > 0 ? '搜索结果' : '为日常，挑一件').fontSize(21).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
           Blank()
           if (!this.loading && !this.failed) {
-            Text(`${this.products.length} 件商品`).fontSize(12).fontColor(BrowseTheme.MUTED)
+            Text(`${this.products.length} 件${this.hasMore ? '+' : ''}`).fontSize(12).fontColor(BrowseTheme.MUTED)
           }
         }.width('100%')
         if (this.loading) {
@@ -151,11 +164,11 @@ export struct HomeContent {
             Text('换个关键词，或去店铺里逛逛。').fontSize(13).fontColor(BrowseTheme.MUTED)
             Button('查看全部商品', { type: ButtonType.Normal }).height(44).fontColor(BrowseTheme.PAPER)
               .backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onKeyword(''))
-          }.width('100%').alignItems(HorizontalAlign.Start).padding(22).backgroundColor(BrowseTheme.WASH)
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(22).backgroundColor(BrowseTheme.WASH).borderRadius(AppRadius.CARD)
         } else {
           ForEach(this.products, (product: DiscoveryProduct, index: number) => {
             if (index % 2 === 0) {
-              Row({ space: 14 }) {
+              Row({ space: 12 }) {
                 this.productCell(product, index)
                 if (index + 1 < this.products.length) {
                   this.productCell(this.products[index + 1], index + 1)
@@ -170,7 +183,7 @@ export struct HomeContent {
           }
           Text(this.hasMore ? '商品图片为示意图' : '已经到底了 · 商品图片为示意图').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
         }
-      }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 4, right: 4, top: 12, bottom: 108 })
-    }.width('100%').height('100%').scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
+      }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 4, right: 4, top: 12, bottom: BrowseTheme.BOTTOM_CLEARANCE })
+    }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
   }
 }

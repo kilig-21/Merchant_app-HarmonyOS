@@ -4,6 +4,7 @@ import { Money } from '../utils/Money'
 import { OrderPresentation } from '../utils/OrderPresentation'
 import { AppColors, AppRadius } from '../theme/AppTheme'
 import { PageStateType, PageStateView } from '../components/common/PageStateView'
+import { PageHeader } from '../components/common/PageHeader'
 
 @Component
 export struct OrdersPage {
@@ -71,9 +72,10 @@ export struct OrdersPage {
   @Builder
   filterTab(label: string, status: string) {
     Button(label, { type: ButtonType.Normal }).height(44).fontSize(13)
-      .padding({ left: 16, right: 16 }).borderRadius(22)
-      .backgroundColor(this.filter === status ? AppColors.BRAND : AppColors.SURFACE)
-      .fontColor(this.filter === status ? AppColors.SURFACE : AppColors.TEXT_SECONDARY)
+      .padding({ left: 16, right: 16 })
+      .backgroundColor(this.filter === status ? AppColors.BRAND_SOFT : AppColors.SURFACE)
+      .fontColor(this.filter === status ? AppColors.BRAND : AppColors.TEXT_SECONDARY)
+      .border({ width: 1, color: this.filter === status ? AppColors.BRAND : AppColors.DIVIDER }).borderRadius(22)
       .onClick(() => this.filter = status)
   }
   @Builder
@@ -81,7 +83,7 @@ export struct OrdersPage {
     Column({ space: 16 }) {
       Row() {
         Text('订单详情').fontSize(20).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND).layoutWeight(1)
-        Button('×', { type: ButtonType.Normal }).width(44).height(44).fontSize(25)
+        Button('×', { type: ButtonType.Normal }).width(44).height(44).padding(0).fontSize(25)
           .backgroundColor(Color.Transparent).fontColor(AppColors.BRAND).enabled(!this.actionBusy)
           .accessibilityText('关闭订单详情').onClick(() => { this.detailSheetVisible = false; this.serial++ })
       }.width('100%')
@@ -101,8 +103,7 @@ export struct OrdersPage {
             Text('商品清单').fontSize(17).fontColor(AppColors.BRAND).width('100%')
             ForEach(this.detail.items, (item: OrderItem) => {
               Row({ space: 12 }) {
-                Text('物').width(44).height(52).textAlign(TextAlign.Center).padding({ top: 14 })
-                  .fontSize(18).fontColor(AppColors.BRAND).backgroundColor(AppColors.BRAND_SOFT).borderRadius(8)
+                Image($r('app.media.product_placeholder')).width(48).height(56).objectFit(ImageFit.Cover).borderRadius(10)
                 Column({ space: 6 }) {
                   Text(item.skuNameSnapshot).fontSize(15).fontColor(AppColors.BRAND)
                   Text('数量 ' + item.quantity).fontSize(12).fontColor(AppColors.TEXT_SECONDARY)
@@ -140,13 +141,8 @@ export struct OrdersPage {
 
   build() {
     Column({ space: 16 }) {
-      Row() {
-        Button('‹', { type: ButtonType.Normal }).width(44).height(44).fontSize(30).fontColor(AppColors.BRAND)
-          .backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
-        Text('我的订单').fontSize(20).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND).layoutWeight(1)
-        Button('刷新', { type: ButtonType.Normal }).height(44).fontSize(13).fontColor(AppColors.BRAND)
-          .backgroundColor(Color.Transparent).enabled(!this.loading).onClick(() => this.load())
-      }.width('100%')
+      PageHeader({ title: '我的订单', actionLabel: '刷新', actionDisabled: this.loading,
+        onBack: this.onBack, onAction: () => this.load() })
       Scroll() {
         Row({ space: 8 }) {
           this.filterTab('全部', '')
@@ -174,6 +170,8 @@ export struct OrdersPage {
                   Row() {
                     Text(OrderPresentation.date(order.createdAt)).fontSize(12).fontColor(AppColors.TEXT_SECONDARY).layoutWeight(1)
                     Text(OrderPresentation.status(order.status)).fontSize(12).fontColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT : AppColors.BRAND)
+                      .padding({ left: 9, right: 9, top: 5, bottom: 5 })
+                      .backgroundColor(order.status === 'PENDING_PAYMENT' ? AppColors.ACCENT_SOFT : AppColors.BRAND_SOFT).borderRadius(10)
                   }.width('100%')
                   Divider().color(AppColors.DIVIDER)
                   Text(order.items.map((item: OrderItem) => item.skuNameSnapshot).join(' / ')).fontSize(16).lineHeight(24)
@@ -181,7 +179,7 @@ export struct OrdersPage {
                   Row() {
                     Text('共 ' + OrderPresentation.quantity(order) + ' 件').fontSize(12).fontColor(AppColors.TEXT_SECONDARY)
                     Blank()
-                    Text('¥ ' + order.totalAmount.toFixed(2)).fontSize(22).fontColor(AppColors.BRAND)
+                    Text('¥ ' + order.totalAmount.toFixed(2)).fontSize(22).fontWeight(FontWeight.Medium).fontColor(AppColors.BRAND)
                   }.width('100%')
                   Row() { Blank(); Text('查看详情 ›').fontSize(13).fontColor(AppColors.BRAND) }.width('100%')
                 }.width('100%').padding(18)

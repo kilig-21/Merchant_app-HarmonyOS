@@ -4,6 +4,7 @@ import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 import { BrowseTheme } from '../../theme/BrowseTheme'
 import { ProductArtwork } from '../../theme/ProductArtwork'
+import { AppColors } from '../../theme/AppTheme'
 
 @Component
 export struct StoreContent {
@@ -122,25 +123,21 @@ export struct StoreContent {
 
   build() {
     Scroll() {
-      Column({ space: 26 }) {
-        Column({ space: 18 }) {
+      Column({ space: 22 }) {
+        Column({ space: 12 }) {
           Row() {
-            Text('日常选物 / 店铺目录').fontSize(11).fontColor(BrowseTheme.OLIVE).letterSpacing(1)
+            Text('拾光集 / 店铺目录').fontSize(11).fontColor(BrowseTheme.OLIVE).letterSpacing(1)
             Blank()
-            Text('慢选日常').fontSize(10).fontColor(BrowseTheme.MUTED)
-              .padding({ left: 8, right: 8, top: 4, bottom: 4 }).border({ width: 1, color: BrowseTheme.LINE })
+            Image($r('app.media.nav_store')).width(22).height(22).opacity(0.65)
           }.width('100%')
           Row({ space: 12 }) {
             Column({ space: 8 }) {
-              Text('把日常，\n过成喜欢的样子').fontSize(28).lineHeight(40)
+              Text('发现值得常来的小店').fontSize(26).lineHeight(36)
                 .fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                .lineBreakStrategy(LineBreakStrategy.BALANCED)
               Text('慢一点逛，发现值得留下的好物。').fontSize(12).fontColor(BrowseTheme.MUTED)
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-            Text('选\n物').fontSize(19).lineHeight(28).fontColor(BrowseTheme.OLIVE)
-              .padding({ left: 11, right: 11, top: 15, bottom: 15 })
-              .border({ width: 1, color: BrowseTheme.OLIVE }).borderRadius(28).rotate({ angle: 8 })
           }.width('100%')
-          Divider().color(BrowseTheme.INK).strokeWidth(1)
         }.width('100%').alignItems(HorizontalAlign.Start)
 
         if (this.loadingStores) {
@@ -160,22 +157,24 @@ export struct StoreContent {
               Row({ space: 10 }) {
                 ForEach(this.stores, (store: StoreSummary, index: number) => {
                   Button({ type: ButtonType.Normal }) {
-                    Column({ space: 14 }) {
+                    Column({ space: 12 }) {
                       Row() {
-                        Text(`0${index + 1}`).fontSize(12)
+                        Text(`${index + 1}`.padStart(2, '0')).fontSize(11)
                           .fontColor(this.activeStoreId === store.id ? BrowseTheme.PAPER : BrowseTheme.INK)
                         Blank()
                         Text(this.activeStoreId === store.id ? '正在逛' : '去逛 ↗').fontSize(11)
                           .fontColor(this.activeStoreId === store.id ? BrowseTheme.PAPER : BrowseTheme.INK)
                       }.width('100%')
                       Column({ space: 6 }) {
-                        Text(store.name).fontSize(16).fontWeight(FontWeight.Medium).maxLines(2)
+                        Text(store.name).fontSize(15).lineHeight(22).fontWeight(FontWeight.Medium).maxLines(2)
+                          .constraintSize({ minHeight: '44fp' }).textOverflow({ overflow: TextOverflow.Ellipsis })
                           .fontColor(this.activeStoreId === store.id ? BrowseTheme.PAPER : BrowseTheme.INK)
                         Text(`${store.productCount} 件商品`).fontSize(11)
                           .fontColor(this.activeStoreId === store.id ? BrowseTheme.PAPER : BrowseTheme.MUTED)
                       }.width('100%').alignItems(HorizontalAlign.Start)
-                    }.width(170).padding(16).alignItems(HorizontalAlign.Start)
-                  }.backgroundColor(this.activeStoreId === store.id ? BrowseTheme.INK : BrowseTheme.WASH)
+                    }.width(152).padding(16).alignItems(HorizontalAlign.Start)
+                  }.backgroundColor(this.activeStoreId === store.id ? BrowseTheme.INK : AppColors.SURFACE)
+                    .border({ width: 1, color: this.activeStoreId === store.id ? BrowseTheme.INK : BrowseTheme.LINE })
                     .padding(0)
                     .fontColor(this.activeStoreId === store.id ? BrowseTheme.PAPER : BrowseTheme.INK)
                     .borderRadius(BrowseTheme.RADIUS)
@@ -189,10 +188,12 @@ export struct StoreContent {
           Column({ space: 18 }) {
             Row({ space: 12 }) {
               Column({ space: 6 }) {
-                Text('店 内 选 物').fontSize(10).fontColor(BrowseTheme.OLIVE)
-                Text(this.storeName()).fontSize(23).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                Text('店内好物').fontSize(11).fontColor(BrowseTheme.OLIVE)
+                Text(this.storeName()).fontSize(21).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-              Text('↓').fontSize(24).fontColor(BrowseTheme.OLIVE)
+              if (!this.loadingProducts && !this.productError) {
+                Text(`${this.products.length} 件${this.hasMore ? '+' : ''}`).fontSize(12).fontColor(BrowseTheme.MUTED)
+              }
             }.width('100%')
             if (this.loadingProducts) {
               PageStateView({ type: PageStateType.Loading, title: '正在整理本店好物', description: '稍等片刻。' })
@@ -208,11 +209,11 @@ export struct StoreContent {
                     const other = this.stores.find((store: StoreSummary) => store.id !== this.activeStoreId)
                     if (other !== undefined) { this.selectStore(other.id) }
                   })
-              }.width('100%').alignItems(HorizontalAlign.Start).padding(24).backgroundColor(BrowseTheme.WASH)
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(24).backgroundColor(BrowseTheme.WASH).borderRadius(BrowseTheme.RADIUS)
             } else {
               ForEach(this.products, (product: ProductSummary, index: number) => {
                 if (index % 2 === 0) {
-                  Row({ space: 14 }) {
+                  Row({ space: 12 }) {
                     this.productCell(product, index)
                     if (index + 1 < this.products.length) {
                       this.productCell(this.products[index + 1], index + 1)
@@ -238,7 +239,7 @@ export struct StoreContent {
         }
       }.width('100%').constraintSize({ maxWidth: 640 })
         .padding({ left: 4, right: 4, top: 20, bottom: BrowseTheme.BOTTOM_CLEARANCE })
-    }.width('100%').height('100%').scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
+    }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
 
   }
 }

@@ -4,6 +4,7 @@ import { BrowseConfig, BrowseSource } from '../config/BrowseConfig'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { BrowseTheme } from '../theme/BrowseTheme'
 import { ProductArtwork } from '../theme/ProductArtwork'
+import { AppColors, AppRadius } from '../theme/AppTheme'
 import { QuantityStepper } from '../components/common/QuantityStepper'
 import { PageStateType, PageStateView } from '../components/common/PageStateView'
 
@@ -71,14 +72,19 @@ export struct ProductDetailPage {
     this.feedback = ''
   }
   private async addToCart(): Promise<void> {
-    if (!this.signedIn && BrowseConfig.source === BrowseSource.Remote) { this.onLogin(); return }
+    if (!this.signedIn && BrowseConfig.source === BrowseSource.Remote) {
+      this.showSku = false
+      this.onLogin()
+      return
+    }
     const sku = this.selectedSku()
     if (sku === undefined || !this.canBuy()) { return }
     this.feedback = ''
+    this.success = false
     const added = await this.cart.add(sku.id, this.quantity)
     if (!this.alive) { return }
     this.success = added
-    if (!added && this.cart.authRequired) { this.onLogin() }
+    if (!added && this.cart.authRequired) { this.showSku = false; this.onLogin() }
     this.feedback = added ? `已加入购物车 · ${sku.skuName} × ${this.quantity}` : this.cart.error
     if (added) {
       this.showSku = false
@@ -91,9 +97,9 @@ export struct ProductDetailPage {
   skuPicker() {
     Column({ space: 18 }) {
       Row({ space: 16 }) {
-        Image(ProductArtwork.resolve(this.productId)).width(76).height(88).objectFit(ImageFit.Cover).borderRadius(6)
+        Image(ProductArtwork.resolve(this.productId)).width(76).height(76).objectFit(ImageFit.Cover).borderRadius(AppRadius.CONTROL)
         Column({ space: 7 }) {
-          Text(`¥ ${this.price()}`).fontSize(27).fontColor(BrowseTheme.INK)
+          Text(`¥ ${this.price()}`).fontSize(27).fontWeight(FontWeight.Medium).fontColor(AppColors.ACCENT)
           Text(this.stock() > 0 ? `库存 ${this.stock()} 件` : '暂无可购规格').fontSize(12).fontColor(BrowseTheme.MUTED)
         }.alignItems(HorizontalAlign.Start).layoutWeight(1)
       }.width('100%')
@@ -104,9 +110,10 @@ export struct ProductDetailPage {
             ForEach(this.detail.skus, (sku: ProductSku) => {
               Button(`${sku.skuName}${sku.availableStock === 0 ? ' · 售罄' : ''}`, { type: ButtonType.Normal })
                 .fontSize(13).height(44).padding({ left: 14, right: 14 })
-                .backgroundColor(this.selectedSkuId === sku.id ? BrowseTheme.INK : BrowseTheme.WASH)
-                .fontColor(this.selectedSkuId === sku.id ? BrowseTheme.PAPER : BrowseTheme.INK)
-                .borderRadius(6).margin({ right: 8, bottom: 10 })
+                .backgroundColor(this.selectedSkuId === sku.id ? BrowseTheme.WASH : AppColors.SURFACE)
+                .fontColor(BrowseTheme.INK)
+                .border({ width: 1, color: this.selectedSkuId === sku.id ? BrowseTheme.INK : BrowseTheme.LINE })
+                .borderRadius(AppRadius.CONTROL).margin({ right: 8, bottom: 10 })
                 .enabled(sku.availableStock > 0 && !this.cart.busy)
                 .onClick(() => this.selectSku(sku))
             }, (sku: ProductSku) => sku.id.toString())
@@ -125,7 +132,7 @@ export struct ProductDetailPage {
       .width('100%')
       .align(Alignment.TopStart)
       .scrollBar(BarState.Off)
-      Button(this.cart.busy ? '正在加入…' : '选好了，加入购物车', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(8)
+      Button(this.cart.busy ? '正在加入…' : '选好了，加入购物车', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(AppRadius.CONTROL)
         .backgroundColor(BrowseTheme.INK).fontColor(BrowseTheme.PAPER)
         .enabled(this.canBuy()).onClick(() => this.addToCart())
     }.width('100%').height('100%').padding({ left: 22, right: 22, bottom: 24 })
@@ -142,8 +149,10 @@ export struct ProductDetailPage {
   build() {
     Column() {
       Row() {
-        Button('‹', { type: ButtonType.Normal }).width(44).height(44).fontSize(32).padding(0)
-          .fontColor(BrowseTheme.INK).backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
+        Button({ type: ButtonType.Normal }) {
+          Image($r('app.media.icon_back')).width(22).height(22)
+        }.width(44).height(44).padding(0).borderRadius(AppRadius.CONTROL)
+          .backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
         Text('商品详情').layoutWeight(1).textAlign(TextAlign.Center).fontSize(16).fontColor(BrowseTheme.INK)
         Text('选物').width(44).textAlign(TextAlign.Center).fontSize(11).fontColor(BrowseTheme.OLIVE)
       }.width('100%').padding({ left: 8, right: 8 })
@@ -160,19 +169,17 @@ export struct ProductDetailPage {
               Image(ProductArtwork.resolve(this.productId)).width('100%').aspectRatio(1.15).objectFit(ImageFit.Cover)
               Text('商品示意图').fontSize(10).fontColor(BrowseTheme.MUTED)
                 .padding({ left: 9, right: 9, top: 5, bottom: 5 }).backgroundColor(BrowseTheme.PAPER).margin(14)
-            }.width('100%').borderRadius(8).clip(true)
+            }.width('100%').borderRadius(AppRadius.CARD).clip(true)
             Column({ space: 12 }) {
               Row({ space: 6 }) {
-                Text('¥').fontSize(16).fontColor(BrowseTheme.INK)
-                Text(this.price()).fontSize(34).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                Text('¥').fontSize(16).fontColor(AppColors.ACCENT)
+                Text(this.price()).fontSize(32).fontWeight(FontWeight.Medium).fontColor(AppColors.ACCENT)
                 Blank()
                 Text(this.stock() > 0 ? '有货' : '暂时售罄').fontSize(12).fontColor(BrowseTheme.OLIVE)
-                  .padding({ left: 10, right: 10, top: 5, bottom: 5 }).backgroundColor(BrowseTheme.WASH).borderRadius(4)
+                  .padding({ left: 10, right: 10, top: 5, bottom: 5 }).backgroundColor(BrowseTheme.WASH).borderRadius(12)
               }.width('100%').alignItems(VerticalAlign.Bottom)
-              Text(this.detail.name).fontSize(25).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
-              Text(this.detail.description).fontSize(14).lineHeight(24).fontColor(BrowseTheme.MUTED)
+              Text(this.detail.name).fontSize(24).lineHeight(34).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
             }.width('100%').alignItems(HorizontalAlign.Start)
-            Divider().color(BrowseTheme.LINE)
             Button({ type: ButtonType.Normal }) {
               Row({ space: 14 }) {
                 Text('已选').fontSize(12).fontColor(BrowseTheme.MUTED)
@@ -180,12 +187,14 @@ export struct ProductDetailPage {
                   .fontSize(14).fontColor(BrowseTheme.INK).layoutWeight(1).maxLines(2)
                 Text('›').fontSize(24).fontColor(BrowseTheme.INK)
               }.width('100%').padding(16)
-            }.width('100%').padding(0).backgroundColor(BrowseTheme.WASH).borderRadius(8)
+            }.width('100%').padding(0).backgroundColor(AppColors.SURFACE)
+              .border({ width: 1, color: BrowseTheme.LINE })
+              .borderRadius(AppRadius.CARD)
               .onClick(() => this.showSku = true)
             Button({ type: ButtonType.Normal }) {
               Row({ space: 14 }) {
-                Text('店').fontSize(17).fontColor(BrowseTheme.OLIVE).width(44).height(44)
-                  .textAlign(TextAlign.Center).padding({ top: 10 }).border({ width: 1, color: BrowseTheme.LINE }).borderRadius(6)
+                Image($r('app.media.nav_store')).width(44).height(44).padding(11)
+                  .backgroundColor(BrowseTheme.WASH).borderRadius(AppRadius.CONTROL)
                 Column({ space: 5 }) {
                   Text(this.storeName).fontSize(16).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
                   Text('查看店内全部商品').fontSize(12).fontColor(BrowseTheme.MUTED)
@@ -195,7 +204,7 @@ export struct ProductDetailPage {
             }.width('100%').padding(0).backgroundColor(Color.Transparent).onClick(() => this.onOpenStore(this.storeId))
             Divider().color(BrowseTheme.LINE)
             Column({ space: 16 }) {
-              Text('商品信息').fontSize(21).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+              Text('关于这件好物').fontSize(20).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
               this.informationRow('商品名称', this.detail.name)
               this.informationRow('规格选项', this.detail.skus.map((sku: ProductSku) => sku.skuName).join(' / '))
               this.informationRow('当前库存', this.selectedSku() === undefined ? '暂无可购规格' : `${this.stock()} 件，以所选规格为准`)
@@ -215,7 +224,8 @@ export struct ProductDetailPage {
           Button(this.cart.busy ? '正在加入…' : this.stock() === 0 ? '暂时售罄' : '加入购物车', { type: ButtonType.Normal })
             .layoutWeight(1).height(50).fontSize(16).fontColor(BrowseTheme.PAPER).backgroundColor(BrowseTheme.INK)
             .borderRadius(BrowseTheme.RADIUS).enabled(this.canBuy()).onClick(() => this.addToCart())
-        }.width('100%').padding({ left: 20, right: 20, top: 12, bottom: 16 }).backgroundColor(BrowseTheme.PAPER)
+        }.width('100%').padding({ left: 20, right: 20, top: 12, bottom: 16 }).backgroundColor(AppColors.SURFACE)
+          .border({ width: { top: 1 }, color: BrowseTheme.LINE })
       }
     }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)
       .bindSheet($$this.showSku, this.skuPicker(), {
