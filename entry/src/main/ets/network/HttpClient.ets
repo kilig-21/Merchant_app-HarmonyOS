@@ -87,7 +87,8 @@ export class HttpClient {
         if (statusCode < 200 || statusCode >= 300) {
           throw new ApiError(ApiErrorKind.Http, `服务响应异常：${statusCode}`, statusCode)
         }
-        throw error
+        const message = error instanceof Error ? error.message : '服务响应格式无法识别'
+        throw new ApiError(ApiErrorKind.InvalidResponse, message)
       }
 
       if (statusCode < 200 || statusCode >= 300) {

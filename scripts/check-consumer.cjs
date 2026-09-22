@@ -119,6 +119,22 @@ async function run() {
   assert.deepEqual(partial.items.map(x => x.id), [2], '部分删除失败后必须同步已删除项');
   assert.deepEqual(partial.selectedIds, [2]);
   assert.ok(partial.error.length > 0);
-  console.log('PASS: 离线会话保留、恢复异常兜底、401 失效、登录连点、退出清理、原请求重试、订单筛选/数量、商品分页、批量删除部分失败恢复。');
+
+  const { AfterSalePresentation } = load('utils/AfterSalePresentation.ets');
+  const { SubmitAfterSaleRequest } = load('model/AfterSaleModels.ets');
+  assert.equal(AfterSalePresentation.status('SUBMITTED'), '已提交');
+  assert.equal(AfterSalePresentation.status('APPROVED'), '审核通过');
+  assert.equal(AfterSalePresentation.status('REJECTED'), '审核未通过');
+  assert.equal(AfterSalePresentation.date(null), '—');
+  assert.equal(AfterSalePresentation.date('2026-09-22T12:34:56'), '2026-09-22 12:34');
+  const afterSaleRequest = new SubmitAfterSaleRequest(81, 2, '商品破损');
+  assert.equal(afterSaleRequest.orderItemId, 81);
+  assert.equal(afterSaleRequest.quantity, 2);
+  assert.equal(afterSaleRequest.reason, '商品破损');
+  const afterSaleApi = fs.readFileSync(path.resolve(root, 'api/AfterSaleApi.ets'), 'utf8');
+  for (const endpoint of ['/api/after-sales/eligible-orders', "'/api/after-sales'", '`/api/after-sales/${id}`']) {
+    assert.ok(afterSaleApi.includes(endpoint), `售后 API 必须包含 ${endpoint}`);
+  }
+  console.log('PASS: 离线会话、登录互斥、结算重试、订单状态、商品分页、购物车失败恢复及售后接口合同/状态展示。');
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });

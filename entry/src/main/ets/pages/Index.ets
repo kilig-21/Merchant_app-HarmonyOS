@@ -9,6 +9,7 @@ import { ProductDetailPage } from './ProductDetailPage'
 import { AddressManagerPage } from './AddressManagerPage'
 import { CheckoutPage } from './CheckoutPage'
 import { OrdersPage } from './OrdersPage'
+import { AfterSalesPage } from './AfterSalesPage'
 import { AuthPage } from './AuthPage'
 import { ServicePage } from './ServicePage'
 import { ProductRoute } from '../model/ProductModels'
@@ -49,7 +50,7 @@ struct Index {
     this.pageStack.pushPath({ name: 'login', param: new PageRoute() })
   }
   private openPage(name: string, status: string = ''): void {
-    if (['orders', 'addresses', 'checkout'].includes(name) && !this.authenticated()) {
+    if (['orders', 'addresses', 'checkout', 'afterSales'].includes(name) && !this.authenticated()) {
       this.login(name, status)
       return
     }
@@ -111,6 +112,10 @@ struct Index {
         OrdersPage({ initialFilter: (param as PageRoute).status, onBack: () => this.pageStack.pop(),
           onBrowse: () => { this.pageStack.clear(); this.selectedTabIndex = 1 } })
       }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
+    } else if (name === 'afterSales') {
+      NavDestination() {
+        AfterSalesPage({ onBack: () => this.pageStack.pop() })
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'login') {
       NavDestination() {
         AuthPage({ session: this.session, onBack: () => this.pageStack.pop(), onSuccess: () => this.signedIn() })
@@ -159,6 +164,7 @@ struct Index {
             ProfileContent({ session: this.session, onLogin: () => this.login(),
               onOpenOrders: (status: string) => this.openPage('orders', status),
               onOpenAddresses: () => this.openPage('addresses'),
+              onOpenAfterSales: () => this.openPage('afterSales'),
               onOpenHelp: () => this.openPage('help'), onOpenSettings: () => this.openPage('settings') })
           }
         }.width('100%').height('100%').padding({ left: 16, right: 16, top: 8 })

@@ -7,6 +7,7 @@ export struct ProfileContent {
   onLogin: () => void = () => {}
   onOpenOrders: (status: string) => void = () => {}
   onOpenAddresses: () => void = () => {}
+  onOpenAfterSales: () => void = () => {}
   onOpenHelp: () => void = () => {}
   onOpenSettings: () => void = () => {}
 
@@ -89,6 +90,8 @@ export struct ProfileContent {
         }.width('100%').padding(18).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD)
         Column() {
           this.service($r('app.media.icon_address'), '收货地址', '管理你的收货信息', this.onOpenAddresses)
+          Divider().color(AppColors.DIVIDER)
+          this.service($r('app.media.icon_after_sale'), '售后服务', '申请售后并查看处理进度', this.onOpenAfterSales)
           Divider().color(AppColors.DIVIDER)
           this.service($r('app.media.icon_help'), '购物帮助', '购物流程与常见问题', this.onOpenHelp)
           Divider().color(AppColors.DIVIDER)
