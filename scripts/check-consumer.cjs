@@ -146,9 +146,22 @@ async function run() {
   assert.equal(PromotionPresentation.phase(promotion, Date.parse('2026-09-23T09:59:00')), '距开始 01:00');
   assert.equal(PromotionPresentation.canReserve(promotion, Date.parse('2026-09-23T10:30:00')), true);
   assert.equal(PromotionPresentation.phase({ ...promotion, stockStatus: 'SOLD_OUT' }, Date.parse('2026-09-23T10:30:00')), '已售罄');
+  assert.equal(PromotionPresentation.reservationStatus('PENDING_ORDER'), '订单创建中');
+  assert.equal(PromotionPresentation.reservationStatus('ORDER_CREATED'), '订单已创建');
+  const { PromotionReservationIntent } = load('viewmodel/PromotionReservationIntent.ets');
+  const promotionIntent = new PromotionReservationIntent();
+  const promotionRequest = promotionIntent.begin(502, 1);
+  assert.strictEqual(promotionIntent.begin(999, 2), promotionRequest, '结果未知时必须复用原抢购请求和幂等键');
+  assert.equal(promotionRequest.activityItemId, 502);
+  assert.equal(promotionRequest.quantity, 1);
+  assert.ok(promotionRequest.requestKey.startsWith('promo-502-'));
+  promotionIntent.reset();
+  assert.notEqual(promotionIntent.begin(502, 1).requestKey, promotionRequest.requestKey);
   const promotionApi = fs.readFileSync(path.resolve(root, 'api/PromotionApi.ets'), 'utf8');
   assert.ok(promotionApi.includes("'/api/public/promotions'"));
   assert.ok(promotionApi.includes('`/api/public/promotions/${activityId}`'));
-  console.log('PASS: 离线会话、登录互斥、结算重试、订单状态、商品分页、购物车失败恢复、售后及限量活动浏览。');
+  assert.ok(promotionApi.includes("'/api/promotions/reservations'"));
+  assert.ok(promotionApi.includes('`/api/promotions/reservations/${encodeURIComponent(reservationId)}`'));
+  console.log('PASS: 离线会话、登录互斥、结算/抢购幂等重试、订单状态、商品分页、购物车失败恢复、售后及限量活动。');
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });

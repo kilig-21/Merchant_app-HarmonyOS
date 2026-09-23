@@ -126,7 +126,8 @@ struct Index {
       }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'promotion') {
       NavDestination() {
-        PromotionDetailPage({ activityId: (param as PromotionRoute).activityId, onBack: () => this.pageStack.pop() })
+        PromotionDetailPage({ activityId: (param as PromotionRoute).activityId, signedIn: this.authenticated(),
+          onBack: () => this.pageStack.pop(), onLogin: () => this.login(), onOpenOrders: () => this.openPage('orders') })
       }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'login') {
       NavDestination() {

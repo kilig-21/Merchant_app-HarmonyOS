@@ -32,6 +32,13 @@ export class PromotionPresentation {
     return value.replace('T', ' ').substring(0, 16)
   }
 
+  static reservationStatus(value: string): string {
+    if (value === 'PENDING_ORDER') { return '订单创建中' }
+    if (value === 'ORDER_CREATED') { return '订单已创建' }
+    if (value === 'FAILED') { return '订单创建失败' }
+    return '资格状态更新中'
+  }
+
   private static duration(milliseconds: number): string {
     const seconds = Math.max(0, Math.floor(milliseconds / 1000))
     const hours = Math.floor(seconds / 3600)

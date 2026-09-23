@@ -23,6 +23,38 @@ export interface PromotionActivityDetail {
   activity: PromotionActivity
 }
 
+export interface PromotionReservationResult {
+  code: number
+  reservationId: string
+}
+
+export interface PromotionReservationDetail {
+  reservationId: string
+  activityItemId: number
+  quantity: number
+  unitPriceSnapshot: number
+  reservationStatus: string
+  orderId: number | null
+  orderNo: string | null
+  orderStatus: string | null
+  totalAmount: number
+  expireAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export class ReservePromotionRequest {
+  activityItemId: number
+  quantity: number
+  requestKey: string
+
+  constructor(activityItemId: number, quantity: number, requestKey: string) {
+    this.activityItemId = activityItemId
+    this.quantity = quantity
+    this.requestKey = requestKey
+  }
+}
+
 export class PromotionRoute {
   activityId: number
 
