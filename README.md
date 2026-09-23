@@ -62,9 +62,11 @@ entry/build/default/outputs/default/entry-default-unsigned.hap
 & 'D:\Coding\IDEs\DevEco Studio\tools\node\node.exe' scripts/check-theme.cjs
 & 'D:\Coding\IDEs\DevEco Studio\tools\node\node.exe' scripts/check-shopping.cjs '<TypeScript模块目录>'
 & 'D:\Coding\IDEs\DevEco Studio\tools\node\node.exe' scripts/check-consumer.cjs '<TypeScript模块目录>'
+node scripts/check-accessibility.cjs
+node scripts/check-release.cjs
 ```
 
-`check-theme.cjs` 检查共享色板的文字对比度；其余脚本覆盖商品/SKU/购物车金额、库存、会话恢复、登录、订单、售后、促销倒计时、抢购幂等请求和写操作互斥等逻辑。
+`check-theme.cjs` 检查共享色板的文字对比度；其余脚本覆盖商品/SKU/购物车金额、库存、会话恢复、登录、订单、售后、促销倒计时、抢购幂等请求、响应式断点、无障碍语义、最小权限和发布配置等逻辑。
 
 ## 界面验收 fixture
 
@@ -95,6 +97,8 @@ entry/src/main/ets/config/NetworkConfig.ets
 ## 视觉验收
 
 最近一次模拟器验收记录见：[docs/视觉验收-2026-09-22.md](docs/视觉验收-2026-09-22.md)。其中包含首页、店铺、个人中心、结算、桌面图标、接口不可达状态，以及默认字号和 1.3 倍字号的检查范围。
+
+正式签名、应用身份和设备验收边界见：[docs/发布前验收清单.md](docs/发布前验收清单.md)。
 
 ## 当前边界
 

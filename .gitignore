@@ -22,3 +22,13 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 /output/consumer-review/
+
+# Personal signing material must never enter source control
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.cer
+*.p7b
+*.pem
+signing/
