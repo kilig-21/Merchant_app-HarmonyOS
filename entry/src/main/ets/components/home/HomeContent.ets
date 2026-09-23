@@ -21,21 +21,49 @@ export struct HomeContent {
   @State loadingMore: boolean = false
   @State moreFailed: boolean = false
   @State hasMore: boolean = false
+  @State productReveal: boolean = false
+  @State sceneFloat: boolean = false
   private page: number = 1
   private repository: BrowseRepository = new BrowseRepository()
   private requestSerial: number = 0
   private timer: number = -1
+  private revealTimer: number = -1
+  private sceneTimer: number = -1
   private alive: boolean = false
 
   aboutToAppear(): void {
     this.alive = true
     this.keyword = this.initialQuery
+    this.startSceneMotion()
     this.search()
   }
   aboutToDisappear(): void {
     this.alive = false
     this.requestSerial++
     clearTimeout(this.timer)
+    clearTimeout(this.revealTimer)
+    clearTimeout(this.sceneTimer)
+  }
+
+  private startSceneMotion(): void {
+    this.sceneFloat = false
+    this.sceneTimer = setTimeout(() => {
+      if (!this.alive) { return }
+      this.getUIContext().animateTo({ duration: 2600, curve: Curve.EaseInOut, iterations: 3, playMode: PlayMode.Alternate }, () => {
+        this.sceneFloat = true
+      })
+    }, 180)
+  }
+
+  private revealProducts(): void {
+    clearTimeout(this.revealTimer)
+    this.productReveal = false
+    this.revealTimer = setTimeout(() => {
+      if (!this.alive) { return }
+      this.getUIContext().animateTo({ duration: 520, curve: 'spring-motion(0.55,0.82,0)' }, () => {
+        this.productReveal = true
+      })
+    }, 40)
   }
   private onKeyword(value: string): void {
     this.keyword = value
@@ -56,7 +84,11 @@ export struct HomeContent {
     this.page = 1
     try {
       const products = await this.repository.searchProducts(this.keyword)
-      if (this.alive && serial === this.requestSerial) { this.products = products; this.hasMore = products.length === 20 }
+      if (this.alive && serial === this.requestSerial) {
+        this.products = products
+        this.hasMore = products.length === 20
+        this.revealProducts()
+      }
     } catch (_) {
       if (this.alive && serial === this.requestSerial) { this.failed = true }
     } finally {
@@ -125,6 +157,7 @@ export struct HomeContent {
                   .padding({ left: 12, right: 12, top: 7, bottom: 7 }).backgroundColor(AppColors.SURFACE).borderRadius(16)
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
               Image($r('app.media.scene_daily')).width('28%').aspectRatio(0.89).objectFit(ImageFit.Contain)
+                .translate({ y: this.sceneFloat ? -6 : 2 }).scale({ x: this.sceneFloat ? 1.025 : 0.99, y: this.sceneFloat ? 1.025 : 0.99 })
                 .accessibilityLevel('no')
             }.width('100%').padding(16).alignItems(VerticalAlign.Center)
           }.width('100%').padding(0).backgroundColor(AppColors.SAND).borderRadius(BrowseTheme.RADIUS)
@@ -186,7 +219,8 @@ export struct HomeContent {
                 this.productCell(product, index)
               }.alignSelf(ItemAlign.Start).margin({ bottom: 12 })
             }, (product: DiscoveryProduct) => `${product.storeId}-${product.id}`)
-          }.width('100%').alignItems(ItemAlign.Start)
+          }.width('100%').alignItems(ItemAlign.Start).opacity(this.productReveal ? 1 : 0)
+            .translate({ y: this.productReveal ? 0 : 14 })
           if (this.hasMore) {
             Button(this.loadingMore ? '正在加载…' : this.moreFailed ? '加载失败，点击重试' : '加载更多商品', { type: ButtonType.Normal })
               .width('100%').height(44).backgroundColor(BrowseTheme.WASH).fontColor(BrowseTheme.INK).borderRadius(12)

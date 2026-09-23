@@ -16,7 +16,7 @@ export struct FloatingTabBar {
           x: index === this.selectedIndex ? 1.08 : 1,
           y: index === this.selectedIndex ? 1.08 : 1
         })
-        .animation({ duration: 240, curve: Curve.EaseInOut })
+        .animation({ duration: 360, curve: 'responsive-spring-motion(0.38,0.82,0)' })
       if (index === 2 && this.cartCount > 0) {
         Text(this.cartCount > 99 ? '99+' : this.cartCount.toString())
           .fontSize(10).fontWeight(FontWeight.Medium).fontColor(AppColors.SURFACE).backgroundColor(AppColors.ACCENT)
@@ -29,7 +29,7 @@ export struct FloatingTabBar {
         .lineHeight(15)
         .fontWeight(index === this.selectedIndex ? FontWeight.Medium : FontWeight.Regular)
         .fontColor(index === this.selectedIndex ? AppColors.BRAND : AppColors.TEXT_SECONDARY)
-        .animation({ duration: 200, curve: Curve.EaseInOut })
+        .animation({ duration: 300, curve: 'responsive-spring-motion(0.38,0.86,0)' })
     }
     .layoutWeight(1)
     .height(54)
@@ -38,7 +38,7 @@ export struct FloatingTabBar {
     .focusable(true)
     .stateStyles({ pressed: { opacity: 0.65 } })
     .onClick(() => {
-      this.getUIContext().animateTo({ duration: 280, curve: Curve.EaseInOut }, () => {
+      this.getUIContext().animateTo({ duration: 380, curve: 'responsive-spring-motion(0.36,0.78,0)' }, () => {
         this.onSelect(index)
       })
     })
@@ -53,7 +53,7 @@ export struct FloatingTabBar {
       .backgroundColor(AppColors.BRAND_SOFT)
       .borderRadius(18)
       .translate({ x: `${this.selectedIndex * 100}%` })
-      .animation({ duration: 280, curve: Curve.EaseInOut })
+      .animation({ duration: 380, curve: 'responsive-spring-motion(0.36,0.78,0)' })
 
       Row() {
         this.tabItem(0, $r('app.media.nav_home'), '首页')
