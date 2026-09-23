@@ -135,6 +135,20 @@ async function run() {
   for (const endpoint of ['/api/after-sales/eligible-orders', "'/api/after-sales'", '`/api/after-sales/${id}`']) {
     assert.ok(afterSaleApi.includes(endpoint), `售后 API 必须包含 ${endpoint}`);
   }
-  console.log('PASS: 离线会话、登录互斥、结算重试、订单状态、商品分页、购物车失败恢复及售后接口合同/状态展示。');
+
+  const { PromotionPresentation } = load('utils/PromotionPresentation.ets');
+  const promotion = {
+    activityId: 501, activityItemId: 502, name: '限时抢购', productName: '手冲咖啡', skuName: '250g',
+    activityPrice: 19.9, startAt: '2026-09-23T10:00:00', endAt: '2026-09-23T12:00:00',
+    status: 'ACTIVE', stockStatus: 'AVAILABLE', limitPerUser: 1
+  };
+  assert.equal(PromotionPresentation.status(promotion, Date.parse('2026-09-23T09:59:00')), '即将开始');
+  assert.equal(PromotionPresentation.phase(promotion, Date.parse('2026-09-23T09:59:00')), '距开始 01:00');
+  assert.equal(PromotionPresentation.canReserve(promotion, Date.parse('2026-09-23T10:30:00')), true);
+  assert.equal(PromotionPresentation.phase({ ...promotion, stockStatus: 'SOLD_OUT' }, Date.parse('2026-09-23T10:30:00')), '已售罄');
+  const promotionApi = fs.readFileSync(path.resolve(root, 'api/PromotionApi.ets'), 'utf8');
+  assert.ok(promotionApi.includes("'/api/public/promotions'"));
+  assert.ok(promotionApi.includes('`/api/public/promotions/${activityId}`'));
+  console.log('PASS: 离线会话、登录互斥、结算重试、订单状态、商品分页、购物车失败恢复、售后及限量活动浏览。');
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });

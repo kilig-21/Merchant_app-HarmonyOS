@@ -10,9 +10,12 @@ import { AddressManagerPage } from './AddressManagerPage'
 import { CheckoutPage } from './CheckoutPage'
 import { OrdersPage } from './OrdersPage'
 import { AfterSalesPage } from './AfterSalesPage'
+import { PromotionDetailPage } from './PromotionDetailPage'
+import { PromotionsPage } from './PromotionsPage'
 import { AuthPage } from './AuthPage'
 import { ServicePage } from './ServicePage'
 import { ProductRoute } from '../model/ProductModels'
+import { PromotionRoute } from '../model/PromotionModels'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { SessionViewModel } from '../viewmodel/SessionViewModel'
 import { BrowseConfig, BrowseSource } from '../config/BrowseConfig'
@@ -116,6 +119,15 @@ struct Index {
       NavDestination() {
         AfterSalesPage({ onBack: () => this.pageStack.pop() })
       }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
+    } else if (name === 'promotions') {
+      NavDestination() {
+        PromotionsPage({ onBack: () => this.pageStack.pop(),
+          onOpenDetail: (activityId: number) => this.pageStack.pushPath({ name: 'promotion', param: new PromotionRoute(activityId) }) })
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
+    } else if (name === 'promotion') {
+      NavDestination() {
+        PromotionDetailPage({ activityId: (param as PromotionRoute).activityId, onBack: () => this.pageStack.pop() })
+      }.hideTitleBar(true).backgroundColor(AppColors.BACKGROUND)
     } else if (name === 'login') {
       NavDestination() {
         AuthPage({ session: this.session, onBack: () => this.pageStack.pop(), onSuccess: () => this.signedIn() })
@@ -136,6 +148,7 @@ struct Index {
             HomeContent({ initialQuery: this.homeQuery, cartCount: this.cart.count(),
               onQueryChange: (query: string) => this.homeQuery = query,
               onNavigate: (index: number) => this.selectedTabIndex = index,
+              onOpenPromotions: () => this.openPage('promotions'),
               onOpenProduct: (storeId: number, productId: number) => this.openProduct(storeId, productId) })
           } else if (this.selectedTabIndex === 1) {
             StoreContent({ selectedStoreId: this.browseStoreId,

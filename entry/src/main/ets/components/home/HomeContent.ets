@@ -11,6 +11,7 @@ export struct HomeContent {
   @Prop initialQuery: string = ''
   @Prop cartCount: number = 0
   onNavigate: (index: number) => void = () => {}
+  onOpenPromotions: () => void = () => {}
   onOpenProduct: (storeId: number, productId: number) => void = () => {}
   onQueryChange: (keyword: string) => void = () => {}
   @State keyword: string = ''
@@ -128,6 +129,18 @@ export struct HomeContent {
             }.width('100%').padding(16).alignItems(VerticalAlign.Center)
           }.width('100%').padding(0).backgroundColor(AppColors.SAND).borderRadius(BrowseTheme.RADIUS)
             .onClick(() => this.onNavigate(1)).accessibilityText('从一家好店开始，打开店铺目录')
+          Button({ type: ButtonType.Normal }) {
+            Row({ space: 12 }) {
+              Text('限').fontSize(13).fontWeight(FontWeight.Medium).fontColor(AppColors.SURFACE).width(30).height(30)
+                .textAlign(TextAlign.Center).backgroundColor(AppColors.ACCENT).borderRadius(15)
+              Column({ space: 3 }) {
+                Text('限量活动').fontSize(14).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
+                Text('跟随服务端时间，查看正在进行的精选。').fontSize(11).fontColor(BrowseTheme.MUTED)
+              }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+              Text('›').fontSize(20).fontColor(BrowseTheme.MUTED)
+            }.width('100%').padding({ left: 14, right: 14, top: 10, bottom: 10 }).alignItems(VerticalAlign.Center)
+          }.width('100%').padding(0).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD)
+            .border({ width: 1, color: BrowseTheme.LINE }).onClick(() => this.onOpenPromotions()).accessibilityText('打开限量活动')
           Row({ space: 8 }) {
             Button({ type: ButtonType.Normal }) {
               Row({ space: 8 }) {
