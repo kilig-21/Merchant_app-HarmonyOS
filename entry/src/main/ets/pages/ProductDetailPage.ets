@@ -97,7 +97,7 @@ export struct ProductDetailPage {
   skuPicker() {
     Column({ space: 18 }) {
       Row({ space: 16 }) {
-        Image(ProductArtwork.resolve(this.productId)).width(76).height(76).objectFit(ImageFit.Cover).borderRadius(AppRadius.CONTROL)
+        Image(ProductArtwork.resolve(this.productId)).width(76).height(76).objectFit(ImageFit.Cover).borderRadius(AppRadius.CONTROL).accessibilityLevel('no')
         Column({ space: 7 }) {
           Text(`¥ ${this.price()}`).fontSize(27).fontWeight(FontWeight.Medium).fontColor(AppColors.ACCENT)
           Text(this.stock() > 0 ? `库存 ${this.stock()} 件` : '暂无可购规格').fontSize(12).fontColor(BrowseTheme.MUTED)
@@ -150,7 +150,7 @@ export struct ProductDetailPage {
     Column() {
       Row() {
         Button({ type: ButtonType.Normal }) {
-          Image($r('app.media.icon_back')).width(22).height(22)
+          Image($r('app.media.icon_back')).width(22).height(22).accessibilityLevel('no')
         }.width(44).height(44).padding(0).borderRadius(AppRadius.CONTROL)
           .backgroundColor(Color.Transparent).onClick(this.onBack).accessibilityText('返回')
         Text('商品详情').layoutWeight(1).textAlign(TextAlign.Center).fontSize(16).fontColor(BrowseTheme.INK)
@@ -166,7 +166,7 @@ export struct ProductDetailPage {
         Scroll() {
           Column({ space: 22 }) {
             Stack({ alignContent: Alignment.BottomStart }) {
-              Image(ProductArtwork.resolve(this.productId)).width('100%').aspectRatio(1.15).objectFit(ImageFit.Cover)
+              Image(ProductArtwork.resolve(this.productId)).width('100%').aspectRatio(1.15).objectFit(ImageFit.Cover).accessibilityLevel('no')
               Text('商品示意图').fontSize(10).fontColor(BrowseTheme.MUTED)
                 .padding({ left: 9, right: 9, top: 5, bottom: 5 }).backgroundColor(BrowseTheme.PAPER).margin(14)
             }.width('100%').borderRadius(AppRadius.CARD).clip(true)
@@ -193,7 +193,7 @@ export struct ProductDetailPage {
               .onClick(() => this.showSku = true)
             Button({ type: ButtonType.Normal }) {
               Row({ space: 14 }) {
-                Image($r('app.media.nav_store')).width(44).height(44).padding(11)
+                Image($r('app.media.nav_store')).width(44).height(44).padding(11).accessibilityLevel('no')
                   .backgroundColor(BrowseTheme.WASH).borderRadius(AppRadius.CONTROL)
                 Column({ space: 5 }) {
                   Text(this.storeName).fontSize(16).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)

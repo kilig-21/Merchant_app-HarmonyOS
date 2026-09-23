@@ -123,7 +123,7 @@ export struct CheckoutPage {
             Text('已选商品').fontSize(15).fontWeight(FontWeight.Medium).fontColor(AppColors.TEXT_PRIMARY).width('100%').margin({ top: 6 })
             ForEach(this.cart.selectedItems(), (item: CartItem) => {
               Row({ space: 12 }) {
-                Image(ProductArtwork.resolve(item.productId)).width(52).height(60).objectFit(ImageFit.Cover).borderRadius(10)
+                Image(ProductArtwork.resolve(item.productId)).width(52).height(60).objectFit(ImageFit.Cover).borderRadius(10).accessibilityLevel('no')
                 Column({ space: 5 }) { Text(item.productName).fontSize(14).fontColor(AppColors.TEXT_PRIMARY); Text(`${item.skuName} × ${item.quantity}`).fontSize(12).fontColor(AppColors.TEXT_SECONDARY) }.layoutWeight(1).alignItems(HorizontalAlign.Start)
                 Text(`¥ ${Money.format(Money.cents(item.salePrice) * item.quantity)}`).fontSize(14).fontColor(AppColors.TEXT_PRIMARY)
               }.width('100%').padding(AppSpacing.CARD).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).border({ width: 1, color: AppColors.DIVIDER })

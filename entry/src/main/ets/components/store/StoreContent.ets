@@ -128,7 +128,7 @@ export struct StoreContent {
           Row() {
             Text('拾光集 / 店铺目录').fontSize(11).fontColor(BrowseTheme.OLIVE).letterSpacing(1)
             Blank()
-            Image($r('app.media.nav_store')).width(22).height(22).opacity(0.65)
+            Image($r('app.media.nav_store')).width(22).height(22).opacity(0.65).accessibilityLevel('no')
           }.width('100%')
           Row({ space: 12 }) {
             Column({ space: 8 }) {

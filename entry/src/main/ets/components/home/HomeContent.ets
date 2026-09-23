@@ -123,7 +123,7 @@ export struct HomeContent {
         sequence: `${index + 1}`.padStart(2, '0'),
         onOpen: (productId: number) => this.onOpenProduct(product.storeId, productId) })
       Row({ space: 5 }) {
-        Image($r('app.media.nav_store')).width(12).height(12).opacity(0.65)
+        Image($r('app.media.nav_store')).width(12).height(12).opacity(0.65).accessibilityLevel('no')
         Text(product.storeName).fontSize(11).fontColor(BrowseTheme.MUTED).layoutWeight(1)
           .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%').padding({ left: 12, right: 12, top: 4, bottom: 12 })
@@ -145,6 +145,7 @@ export struct HomeContent {
           .textFont({ size: 14 }).placeholderFont({ size: 14 }).placeholderColor(BrowseTheme.MUTED)
           .backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CONTROL)
           .border({ width: 1, color: BrowseTheme.LINE })
+          .accessibilityText('搜索商品或店铺')
           .onChange((value: string) => this.onKeyword(value)).onSubmit(() => this.search())
         if (this.keyword.trim().length === 0) {
           Button({ type: ButtonType.Normal }) {
@@ -177,7 +178,7 @@ export struct HomeContent {
           Row({ space: 8 }) {
             Button({ type: ButtonType.Normal }) {
               Row({ space: 8 }) {
-                Image($r('app.media.nav_cart')).width(19).height(19)
+                Image($r('app.media.nav_cart')).width(19).height(19).accessibilityLevel('no')
                 Text(this.cartCount > 0 ? `购物车 · ${this.cartCount} 件` : '我的购物车').fontSize(12).fontColor(BrowseTheme.INK)
                   .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                 Text('›').fontSize(18).fontColor(BrowseTheme.MUTED)
@@ -186,7 +187,7 @@ export struct HomeContent {
             Divider().vertical(true).height(18).color(BrowseTheme.LINE)
             Button({ type: ButtonType.Normal }) {
               Row({ space: 8 }) {
-                Image($r('app.media.nav_profile')).width(19).height(19)
+                Image($r('app.media.nav_profile')).width(19).height(19).accessibilityLevel('no')
                 Text('我的拾光').fontSize(12).fontColor(BrowseTheme.INK).layoutWeight(1)
                 Text('›').fontSize(18).fontColor(BrowseTheme.MUTED)
               }.width('100%').padding({ left: 12, right: 12 })

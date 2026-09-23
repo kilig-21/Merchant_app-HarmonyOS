@@ -10,7 +10,7 @@ export struct FloatingTabBar {
   tabItem(index: number, icon: Resource, title: string) {
     Column({ space: 4 }) {
       Stack({ alignContent: Alignment.TopEnd }) {
-      Image(icon).width(22).height(22)
+      Image(icon).width(22).height(22).accessibilityLevel('no')
         .opacity(index === this.selectedIndex ? 1 : 0.55)
         .scale({
           x: index === this.selectedIndex ? 1.08 : 1,

@@ -15,7 +15,7 @@ export struct PageHeader {
   build() {
     Row({ space: 4 }) {
       Button({ type: ButtonType.Normal }) {
-        Image($r('app.media.icon_back')).width(22).height(22)
+        Image($r('app.media.icon_back')).width(22).height(22).accessibilityLevel('no')
       }.width(44).height(44).padding(0).backgroundColor(Color.Transparent).borderRadius(AppRadius.CONTROL)
         .enabled(!this.backDisabled).onClick(this.onBack).accessibilityText('返回')
       Column({ space: 3 }) {

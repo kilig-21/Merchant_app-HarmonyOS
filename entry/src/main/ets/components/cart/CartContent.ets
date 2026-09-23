@@ -63,7 +63,7 @@ export struct CartContent {
             }
             if (this.cart.items.length === 0) {
               Column({ space: 18 }) {
-                Image($r('app.media.nav_cart')).width(72).height(72).padding(22)
+                Image($r('app.media.nav_cart')).width(72).height(72).padding(22).accessibilityLevel('no')
                   .backgroundColor(BrowseTheme.WASH).borderRadius(24)
                 Text('把喜欢的，留在这里').fontSize(23).lineHeight(33).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
                 Text('购物车还是空的，去发现一件日常好物。').fontSize(13).lineHeight(22).fontColor(BrowseTheme.MUTED).textAlign(TextAlign.Center)
@@ -80,8 +80,9 @@ export struct CartContent {
                       .enabled(!this.cart.busy && group.items.some((item: CartItem) => this.cart.selectable(item)))
                       .onChange((selected: boolean) => this.cart.selectStore(group.storeId, selected))
                       .accessibilityText(`选择${group.storeName}全部可购商品`)
-                    Text(group.storeName).fontSize(16).fontWeight(FontWeight.Medium).fontColor(BrowseTheme.INK)
-                      .layoutWeight(1).onClick(() => this.onOpenStore(group.storeId))
+                    Button(group.storeName, { type: ButtonType.Normal }).fontSize(16).fontWeight(FontWeight.Medium)
+                      .fontColor(BrowseTheme.INK).layoutWeight(1).height(44).padding(0).backgroundColor(Color.Transparent)
+                      .onClick(() => this.onOpenStore(group.storeId)).accessibilityText(`打开店铺：${group.storeName}`)
                     Text(this.groupSelection(group)).fontSize(10).fontColor(BrowseTheme.MUTED)
                   }.width('100%').padding({ top: 8, bottom: 12 })
                   Divider().color(BrowseTheme.LINE)

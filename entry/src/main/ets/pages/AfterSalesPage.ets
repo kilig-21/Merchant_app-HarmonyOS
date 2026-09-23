@@ -165,6 +165,7 @@ export struct AfterSalesPage {
         Text('售后原因').fontSize(14).fontColor(AppColors.TEXT_PRIMARY)
         TextArea({ text: this.reason, placeholder: '请说明遇到的问题，最多 255 个字符' }).maxLength(255).width('100%').height(104)
           .backgroundColor(AppColors.BACKGROUND).borderRadius(AppRadius.CONTROL).enabled(!this.submitting)
+          .accessibilityText('售后原因')
           .onChange((value: string) => { this.reason = value; this.formError = '' })
       }.width('100%').alignItems(HorizontalAlign.Start)
       if (this.formError.length > 0) { Text(this.formError).fontSize(12).lineHeight(19).fontColor(AppColors.DANGER).width('100%') }

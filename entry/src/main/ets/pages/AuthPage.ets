@@ -35,6 +35,7 @@ export struct AuthPage {
             TextInput({ text: this.account, placeholder: '输入账号，3～64 个字符' }).height(50).maxLength(64)
               .fontSize(14).fontColor(AppColors.BRAND).placeholderColor(AppColors.TEXT_SECONDARY).caretColor(AppColors.BRAND)
               .backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CONTROL).enabled(!this.session.busy)
+              .enterKeyType(EnterKeyType.Next).accessibilityText('账号')
               .onChange((value: string) => { this.account = value; this.session.error = '' })
           }.width('100%').alignItems(HorizontalAlign.Start)
           Column({ space: 8 }) {
@@ -42,6 +43,7 @@ export struct AuthPage {
             TextInput({ text: this.password, placeholder: '输入密码，6～32 个字符' }).type(InputType.Password)
               .fontSize(14).fontColor(AppColors.BRAND).placeholderColor(AppColors.TEXT_SECONDARY).caretColor(AppColors.BRAND)
               .height(50).maxLength(32).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CONTROL)
+              .enterKeyType(EnterKeyType.Done).accessibilityText('密码').onSubmit(() => this.submit())
               .enabled(!this.session.busy).onChange((value: string) => { this.password = value; this.session.error = '' })
           }.width('100%').alignItems(HorizontalAlign.Start)
           if (this.session.error.length > 0) {

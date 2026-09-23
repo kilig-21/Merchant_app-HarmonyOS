@@ -113,7 +113,7 @@ export struct OrdersPage {
             Text('商品清单').fontSize(17).fontColor(AppColors.BRAND).width('100%')
             ForEach(this.detail.items, (item: OrderItem) => {
               Row({ space: 12 }) {
-                Image($r('app.media.product_placeholder')).width(48).height(56).objectFit(ImageFit.Cover).borderRadius(10)
+                Image($r('app.media.product_placeholder')).width(48).height(56).objectFit(ImageFit.Cover).borderRadius(10).accessibilityLevel('no')
                 Column({ space: 6 }) {
                   Text(item.skuNameSnapshot).fontSize(15).fontColor(AppColors.BRAND)
                   Text('数量 ' + item.quantity).fontSize(12).fontColor(AppColors.TEXT_SECONDARY)

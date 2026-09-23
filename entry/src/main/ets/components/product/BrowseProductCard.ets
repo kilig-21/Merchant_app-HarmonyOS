@@ -13,7 +13,7 @@ export struct BrowseProductCard {
   build() {
     Column({ space: 0 }) {
       Stack({ alignContent: Alignment.TopStart }) {
-        Image(this.artwork).width('100%').aspectRatio(1).objectFit(ImageFit.Cover)
+        Image(this.artwork).width('100%').aspectRatio(1).objectFit(ImageFit.Cover).accessibilityLevel('no')
         Text(this.sequence).fontSize(10).fontColor(BrowseTheme.INK).letterSpacing(1)
           .padding({ left: 7, right: 7, top: 4, bottom: 4 }).backgroundColor('#E6FFFEF9').borderRadius(8).margin(10)
         if (this.product.totalAvailableStock === 0) {
@@ -39,6 +39,7 @@ export struct BrowseProductCard {
       .stateStyles({ pressed: { opacity: 0.66 } })
       .onClick(() => this.onOpen(this.product.id))
       .accessibilityText(`${this.product.name}，${this.product.minSalePrice.toFixed(2)}元起，查看商品详情`)
+      .accessibilityGroup(true)
       .focusable(true)
   }
 }

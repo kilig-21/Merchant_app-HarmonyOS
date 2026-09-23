@@ -20,6 +20,7 @@ export struct ServicePage {
           Text(this.expanded === index ? '−' : '+').fontSize(20).fontColor(AppColors.BRAND)
         }.width('100%').padding({ top: 12, bottom: 12 })
       }.width('100%').padding(0).backgroundColor(Color.Transparent)
+        .constraintSize({ minHeight: 48 }).accessibilityText(`${title}，${this.expanded === index ? '已展开' : '未展开'}`)
         .onClick(() => this.getUIContext().animateTo({ duration: 180, curve: Curve.EaseInOut }, () => {
           this.expanded = this.expanded === index ? -1 : index
         }))

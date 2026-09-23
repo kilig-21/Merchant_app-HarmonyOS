@@ -15,7 +15,7 @@ export struct ProfileContent {
   orderEntry(icon: Resource, label: string, status: string) {
     Button({ type: ButtonType.Normal }) {
       Column({ space: 10 }) {
-        Image(icon).width(26).height(26)
+        Image(icon).width(26).height(26).accessibilityLevel('no')
         Text(label).fontSize(12).fontColor(AppColors.BRAND)
       }.width('100%').padding({ top: 15, bottom: 15 })
     }.layoutWeight(1).padding(0).backgroundColor(Color.Transparent).borderRadius(12)
@@ -26,7 +26,7 @@ export struct ProfileContent {
   service(icon: Resource, title: string, description: string, action: () => void) {
     Button({ type: ButtonType.Normal }) {
       Row({ space: 12 }) {
-        Image(icon).width(42).height(42).padding(10).backgroundColor(AppColors.BRAND_SOFT).borderRadius(13)
+        Image(icon).width(42).height(42).padding(10).backgroundColor(AppColors.BRAND_SOFT).borderRadius(13).accessibilityLevel('no')
         Column({ space: 5 }) {
           Text(title).fontSize(16).fontColor(AppColors.BRAND)
           Text(description).fontSize(12).fontColor(AppColors.TEXT_SECONDARY)
@@ -34,6 +34,7 @@ export struct ProfileContent {
         Text('›').fontSize(24).fontColor(AppColors.TEXT_SECONDARY)
       }.width('100%').padding({ top: 18, bottom: 18 })
     }.width('100%').padding(0).backgroundColor(Color.Transparent).borderRadius(8).onClick(action)
+      .accessibilityText(`${title}，${description}`)
   }
 
   build() {
@@ -51,7 +52,7 @@ export struct ProfileContent {
               if (this.session.username.length > 0) {
                 Text(this.session.username.substring(0, 1)).fontSize(23).fontColor(AppColors.BRAND)
               } else {
-                Image($r('app.media.nav_profile')).width(27).height(27)
+                Image($r('app.media.nav_profile')).width(27).height(27).accessibilityLevel('no')
               }
             }.width(54).height(54).backgroundColor(AppColors.BRAND_SOFT).borderRadius(18)
             Column({ space: 8 }) {
@@ -64,6 +65,7 @@ export struct ProfileContent {
           }.width('100%').padding(20)
         }.width('100%').padding(0).backgroundColor(AppColors.BRAND).borderRadius(AppRadius.CARD)
           .onClick(() => { if (this.session.username.length === 0) { this.onLogin() } else { this.onOpenSettings() } })
+          .accessibilityText(this.session.username.length > 0 ? `当前账号 ${this.session.username}，打开设置` : '登录或注册')
         if (this.session.error.length > 0) {
           Button({ type: ButtonType.Normal }) {
             Row({ space: 10 }) {
