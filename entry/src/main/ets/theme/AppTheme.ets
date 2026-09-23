@@ -23,6 +23,10 @@ export class AppSpacing {
   static readonly SECTION: number = 20
   static readonly CARD: number = 16
   static readonly ITEM: number = 12
+  /** 阅读与表单页面在展开态保持舒适行长。 */
+  static readonly CONTENT_MAX: number = 720
+  /** 商品目录在折叠屏展开态允许三列，但不无限拉宽。 */
+  static readonly CATALOG_MAX: number = 840
   // 页面默认已避让系统导航区，只额外保留少量呼吸空间。
   static readonly FLOATING_BAR_BOTTOM: number = 8
   static readonly TAB_CLEARANCE: number = 100

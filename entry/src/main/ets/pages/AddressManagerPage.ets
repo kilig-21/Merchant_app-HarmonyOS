@@ -169,7 +169,8 @@ export struct AddressManagerPage {
           }.width('100%').padding({ top: 4, bottom: 22 })
         }.layoutWeight(1).width('100%').align(Alignment.Top).scrollBar(BarState.Off)
       }
-    }.width('100%').height('100%').padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
+    }.width('100%').height('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).alignSelf(ItemAlign.Center)
+      .padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
       .bindSheet($$this.editorVisible, this.editor(), { height: SheetSize.LARGE, showClose: false, backgroundColor: AppColors.SURFACE,
         shouldDismiss: (action: SheetDismiss) => { if (!this.saving) { action.dismiss() } } })
   }

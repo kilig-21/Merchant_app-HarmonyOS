@@ -1,7 +1,7 @@
 import { CartViewModel } from '../../viewmodel/CartViewModel'
 import { CartGroup, CartItem } from '../../model/CartModels'
 import { BrowseTheme } from '../../theme/BrowseTheme'
-import { AppColors, AppRadius } from '../../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../../theme/AppTheme'
 import { CartItemCard } from './CartItemCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 
@@ -103,7 +103,7 @@ export struct CartContent {
             Text(this.cart.message).fontSize(12).fontColor(BrowseTheme.OLIVE).width('100%')
           }
           Text('库存与可购状态以当前读取结果为准。').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
-        }.width('100%').constraintSize({ maxWidth: 640 }).padding({ top: 20, bottom: 20, left: 4, right: 4 })
+        }.width('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).padding({ top: 20, bottom: 20, left: 4, right: 4 })
       }
       .width('100%')
       .layoutWeight(1)
@@ -129,6 +129,7 @@ export struct CartContent {
           .border({ width: 1, color: BrowseTheme.LINE })
       }
       Blank().height(82)
-    }.width('100%').height('100%').backgroundColor(BrowseTheme.PAPER)
+    }.width('100%').height('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX })
+      .alignSelf(ItemAlign.Center).backgroundColor(BrowseTheme.PAPER)
   }
 }

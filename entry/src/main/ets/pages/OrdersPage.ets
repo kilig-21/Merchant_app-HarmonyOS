@@ -2,7 +2,7 @@ import { OrderApi } from '../api/OrderApi'
 import { OrderDetail, OrderItem } from '../model/OrderModels'
 import { Money } from '../utils/Money'
 import { OrderPresentation } from '../utils/OrderPresentation'
-import { AppColors, AppRadius } from '../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../theme/AppTheme'
 import { PageStateType, PageStateView } from '../components/common/PageStateView'
 import { PageHeader } from '../components/common/PageHeader'
 
@@ -199,7 +199,8 @@ export struct OrdersPage {
           }.width('100%').padding({ bottom: 24 })
         }.layoutWeight(1).width('100%').align(Alignment.Top).scrollBar(BarState.Off)
       }
-    }.width('100%').height('100%').padding({ left: 18, right: 18, top: 8 }).backgroundColor(AppColors.BACKGROUND)
+    }.width('100%').height('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).alignSelf(ItemAlign.Center)
+      .padding({ left: 18, right: 18, top: 8 }).backgroundColor(AppColors.BACKGROUND)
       .bindSheet($$this.detailSheetVisible, this.detailSheet(), { height: SheetSize.LARGE,
         showClose: false, backgroundColor: AppColors.SURFACE,
         shouldDismiss: (action: SheetDismiss) => { if (!this.actionBusy) { this.serial++; action.dismiss() } } })

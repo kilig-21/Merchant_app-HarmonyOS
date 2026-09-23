@@ -4,7 +4,7 @@ import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 import { BrowseTheme } from '../../theme/BrowseTheme'
 import { ProductArtwork } from '../../theme/ProductArtwork'
-import { AppColors, AppRadius } from '../../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../../theme/AppTheme'
 
 @Component
 export struct HomeContent {
@@ -95,7 +95,7 @@ export struct HomeContent {
         Text(product.storeName).fontSize(11).fontColor(BrowseTheme.MUTED).layoutWeight(1)
           .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%').padding({ left: 12, right: 12, top: 4, bottom: 12 })
-    }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+    }.width('100%').alignItems(HorizontalAlign.Start)
       .backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD).clip(true)
   }
 
@@ -179,16 +179,14 @@ export struct HomeContent {
               .backgroundColor(BrowseTheme.INK).borderRadius(8).onClick(() => this.onKeyword(''))
           }.width('100%').alignItems(HorizontalAlign.Start).padding(22).backgroundColor(BrowseTheme.WASH).borderRadius(AppRadius.CARD)
         } else {
-          ForEach(this.products, (product: DiscoveryProduct, index: number) => {
-            if (index % 2 === 0) {
-              Row({ space: 12 }) {
+          GridRow({ columns: 12, gutter: 12,
+            breakpoints: { value: ['360vp', '600vp', '840vp'], reference: BreakpointsReference.WindowSize } }) {
+            ForEach(this.products, (product: DiscoveryProduct, index: number) => {
+              GridCol({ span: { xs: 12, sm: 6, md: 4, lg: 4 } }) {
                 this.productCell(product, index)
-                if (index + 1 < this.products.length) {
-                  this.productCell(this.products[index + 1], index + 1)
-                } else { Column().layoutWeight(1) }
-              }.width('100%').alignItems(VerticalAlign.Top)
-            }
-          }, (product: DiscoveryProduct) => `${product.storeId}-${product.id}`)
+              }.alignSelf(ItemAlign.Start).margin({ bottom: 12 })
+            }, (product: DiscoveryProduct) => `${product.storeId}-${product.id}`)
+          }.width('100%').alignItems(ItemAlign.Start)
           if (this.hasMore) {
             Button(this.loadingMore ? '正在加载…' : this.moreFailed ? '加载失败，点击重试' : '加载更多商品', { type: ButtonType.Normal })
               .width('100%').height(44).backgroundColor(BrowseTheme.WASH).fontColor(BrowseTheme.INK).borderRadius(12)
@@ -196,7 +194,7 @@ export struct HomeContent {
           }
           Text(this.hasMore ? '商品图片为示意图' : '已经到底了 · 商品图片为示意图').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
         }
-      }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 4, right: 4, top: 12, bottom: BrowseTheme.BOTTOM_CLEARANCE })
+      }.width('100%').constraintSize({ maxWidth: AppSpacing.CATALOG_MAX }).padding({ left: 4, right: 4, top: 12, bottom: BrowseTheme.BOTTOM_CLEARANCE })
     }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
   }
 }

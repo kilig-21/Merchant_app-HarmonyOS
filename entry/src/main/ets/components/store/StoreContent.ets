@@ -4,7 +4,7 @@ import { BrowseProductCard } from '../product/BrowseProductCard'
 import { PageStateType, PageStateView } from '../common/PageStateView'
 import { BrowseTheme } from '../../theme/BrowseTheme'
 import { ProductArtwork } from '../../theme/ProductArtwork'
-import { AppColors } from '../../theme/AppTheme'
+import { AppColors, AppSpacing } from '../../theme/AppTheme'
 
 @Component
 export struct StoreContent {
@@ -118,7 +118,7 @@ export struct StoreContent {
         sequence: `${index + 1}`.padStart(2, '0'),
         onOpen: (productId: number) => this.onOpenProduct(this.activeStoreId, productId)
       })
-    }.layoutWeight(1).alignSelf(ItemAlign.Start)
+    }.width('100%').alignSelf(ItemAlign.Start)
   }
 
   build() {
@@ -211,18 +211,14 @@ export struct StoreContent {
                   })
               }.width('100%').alignItems(HorizontalAlign.Start).padding(24).backgroundColor(BrowseTheme.WASH).borderRadius(BrowseTheme.RADIUS)
             } else {
-              ForEach(this.products, (product: ProductSummary, index: number) => {
-                if (index % 2 === 0) {
-                  Row({ space: 12 }) {
+              GridRow({ columns: 12, gutter: 12,
+                breakpoints: { value: ['360vp', '600vp', '840vp'], reference: BreakpointsReference.WindowSize } }) {
+                ForEach(this.products, (product: ProductSummary, index: number) => {
+                  GridCol({ span: { xs: 12, sm: 6, md: 4, lg: 4 } }) {
                     this.productCell(product, index)
-                    if (index + 1 < this.products.length) {
-                      this.productCell(this.products[index + 1], index + 1)
-                    } else {
-                      Column().layoutWeight(1)
-                    }
-                  }.width('100%').alignItems(VerticalAlign.Top)
-                }
-              }, (product: ProductSummary) => `${product.id}`)
+                  }.alignSelf(ItemAlign.Start).margin({ bottom: 12 })
+                }, (product: ProductSummary) => `${product.id}`)
+              }.width('100%').alignItems(ItemAlign.Start)
               if (this.hasMore) {
                 Button(this.loadingMore ? '正在加载…' : this.moreFailed ? '加载失败，点击重试' : '加载更多商品', { type: ButtonType.Normal })
                   .width('100%').height(44).backgroundColor(BrowseTheme.WASH).fontColor(BrowseTheme.INK).borderRadius(12)
@@ -237,7 +233,7 @@ export struct StoreContent {
             }
           }.width('100%')
         }
-      }.width('100%').constraintSize({ maxWidth: 640 })
+      }.width('100%').constraintSize({ maxWidth: AppSpacing.CATALOG_MAX })
         .padding({ left: 4, right: 4, top: 20, bottom: BrowseTheme.BOTTOM_CLEARANCE })
     }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off).backgroundColor(BrowseTheme.PAPER)
 

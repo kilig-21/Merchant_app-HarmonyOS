@@ -1,4 +1,4 @@
-import { AppColors, AppRadius } from '../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../theme/AppTheme'
 import { SessionViewModel } from '../viewmodel/SessionViewModel'
 import { PageHeader } from '../components/common/PageHeader'
 
@@ -66,7 +66,7 @@ export struct ServicePage {
                 }
               })
           }
-        }.width('100%').constraintSize({ maxWidth: 640 }).alignItems(HorizontalAlign.Start).padding(22)
+        }.width('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).alignItems(HorizontalAlign.Start).padding(22)
       }.width('100%').layoutWeight(1).align(Alignment.Top).scrollBar(BarState.Off)
     }.width('100%').height('100%').backgroundColor(AppColors.BACKGROUND)
   }

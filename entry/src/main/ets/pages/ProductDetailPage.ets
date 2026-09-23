@@ -4,7 +4,7 @@ import { BrowseConfig, BrowseSource } from '../config/BrowseConfig'
 import { CartViewModel } from '../viewmodel/CartViewModel'
 import { BrowseTheme } from '../theme/BrowseTheme'
 import { ProductArtwork } from '../theme/ProductArtwork'
-import { AppColors, AppRadius } from '../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../theme/AppTheme'
 import { QuantityStepper } from '../components/common/QuantityStepper'
 import { PageStateType, PageStateView } from '../components/common/PageStateView'
 
@@ -211,7 +211,7 @@ export struct ProductDetailPage {
               this.informationRow('商品说明', this.detail.description)
             }.width('100%').alignItems(HorizontalAlign.Start)
             Text('商品图片为示意图，价格与库存以当前页面结果为准。').fontSize(11).fontColor(BrowseTheme.MUTED).width('100%')
-          }.width('100%').constraintSize({ maxWidth: 640 }).padding({ left: 20, right: 20, top: 8, bottom: 28 })
+          }.width('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).padding({ left: 20, right: 20, top: 8, bottom: 28 })
         }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
         if (this.feedback.length > 0) {
           Text(this.feedback).fontSize(12).lineHeight(19).fontColor(this.success ? BrowseTheme.OLIVE : '#99442E')

@@ -142,6 +142,7 @@ export struct CheckoutPage {
         Button(this.submitting ? '正在确认订单…' : this.uncertain ? '确认提交结果' : `提交订单 · ¥ ${this.cart.selectedSubtotal()}`).width('100%').height(50).backgroundColor(AppColors.BRAND).fontColor('#FFFFFF').borderRadius(AppRadius.CONTROL).enabled(!this.submitting && this.cart.selectedItems().length > 0).onClick(() => this.submit())
       }
       Blank().height(16)
-    }.width('100%').height('100%').padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
+    }.width('100%').height('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).alignSelf(ItemAlign.Center)
+      .padding({ left: AppSpacing.PAGE_HORIZONTAL, right: AppSpacing.PAGE_HORIZONTAL, top: 12 }).backgroundColor(AppColors.BACKGROUND)
   }
 }

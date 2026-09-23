@@ -1,5 +1,5 @@
 import { SessionViewModel } from '../../viewmodel/SessionViewModel'
-import { AppColors, AppRadius } from '../../theme/AppTheme'
+import { AppColors, AppRadius, AppSpacing } from '../../theme/AppTheme'
 
 @Component
 export struct ProfileContent {
@@ -97,7 +97,7 @@ export struct ProfileContent {
           Divider().color(AppColors.DIVIDER)
           this.service($r('app.media.icon_settings'), '账户与设置', '账号信息与使用说明', this.onOpenSettings)
         }.width('100%').padding({ left: 18, right: 18 }).backgroundColor(AppColors.SURFACE).borderRadius(AppRadius.CARD)
-      }.width('100%').constraintSize({ maxWidth: 640 }).padding({ top: 20, bottom: 108, left: 4, right: 4 })
+      }.width('100%').constraintSize({ maxWidth: AppSpacing.CONTENT_MAX }).padding({ top: 20, bottom: 108, left: 4, right: 4 })
     }.width('100%').height('100%').align(Alignment.Top).scrollBar(BarState.Off).backgroundColor(AppColors.BACKGROUND)
   }
 }
